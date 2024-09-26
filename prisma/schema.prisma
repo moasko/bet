@@ -1,0 +1,150 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            Int            @id @default(autoincrement())
+  name          String
+  email         String         @unique
+  phone         String         @unique
+  password      String
+  referredBy    User?          @relation("UserReferredBy", fields: [referredById], references: [id])
+  referredById  Int?
+  referredUsers User[]         @relation("UserReferredBy")
+  bets          Bet[]
+  statuts       UserStatus     @default(ACTIVE)
+  payments      Payment[]
+  bonuses       Bonus[]
+  createdAt     DateTime       @default(now())
+  wallet        Wallet         @relation(fields: [walletId], references: [id])
+  walletId      Int
+  Notification  Notification[]
+}
+
+enum UserStatus {
+  ACTIVE
+  BLOKED
+  SUSPENDED
+}
+
+model Bet {
+  id           Int       @id @default(autoincrement())
+  user         User      @relation(fields: [userId], references: [id])
+  userId       Int
+  match        Match     @relation(fields: [matchId], references: [id])
+  matchId      Int
+  amount       Float
+  potentialWin Float
+  status       BetStatus @default(PENDING)
+  createdAt    DateTime  @default(now())
+}
+
+enum BetStatus {
+  PENDING
+  WON
+  LOST
+  CANCELED
+}
+
+enum MatchStatus {
+  PENDING
+  IN_PROGRESS
+  FINISHED
+}
+
+model League {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  country   String
+  flag      String
+  matches   Match[]
+  teams     Team[]
+  createdAt DateTime @default(now())
+}
+
+model Team {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  country     String
+  flag        String
+  league      League?  @relation(fields: [leagueId], references: [id]) // Relation to League
+  leagueId    Int?
+  matchesHome Match[]  @relation("HomeMatches")
+  matchesAway Match[]  @relation("AwayMatches")
+  createdAt   DateTime @default(now())
+}
+
+model Match {
+  id             Int      @id @default(autoincrement())
+  league         League   @relation(fields: [leagueId], references: [id])
+  leagueId       Int
+  homeTeam       Team     @relation("HomeMatches", fields: [homeTeamId], references: [id])
+  homeTeamId     Int
+  awayTeam       Team     @relation("AwayMatches", fields: [awayTeamId], references: [id])
+  awayTeamId     Int
+  percentage     Float // Percentage gain for the bet
+  matchStartTime DateTime // Actual match start time
+  betStartTime   DateTime // When betting starts
+  betEndTime     DateTime // When betting ends
+  result         String? // e.g., "2-0"
+  createdAt      DateTime @default(now())
+  bets           Bet[] // Bets placed on this match
+}
+
+model Payment {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  amount    Float
+  type      String // "deposit", "withdrawal"
+  status    String // "pending", "completed", "failed"
+  createdAt DateTime @default(now())
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  user      User?     @relation(fields: [userId], references: [id])
+  userId    Int?
+  title     String?
+  message   String
+  type      String // "info", "warning", "error"
+  createdAt DateTime @default(now())
+}
+
+enum NotificationType {
+  CREDIT
+  INFO
+  WARNING
+  ERROR
+}
+
+model Bonus {
+  id          Int       @id @default(autoincrement())
+  user        User      @relation(fields: [userId], references: [id])
+  userId      Int
+  type        BonusType
+  amount      Float
+  description String
+  createdAt   DateTime  @default(now())
+}
+
+enum BonusType {
+  REFOUND
+  SIGNUP
+  DEPOSIT
+  REFERRAL
+  COMMISSION
+}
+
+model Wallet {
+  id        Int      @id @default(autoincrement())
+  user      User[]
+  userId    Int
+  balance   Float
+  createdAt DateTime @default(now())
+}
