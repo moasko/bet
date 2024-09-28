@@ -23,9 +23,6 @@ function BettorDetailsPage({ params }: { params: { id: string } }) {
 
   return (
     <div>
-      {/* {
-        JSON.stringify(data,null,2)
-      } */}
       <h1 className="text-xl font-bold">Détails du parieur</h1>
       <StateGrid loading={isLoading} data={data?.infos as any} />
       <div>
