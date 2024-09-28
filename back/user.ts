@@ -2,7 +2,7 @@
 
 import db from "@/lib/db";
 import { currencyToXOF } from "@/lib/utils";
-import { BonusType } from "@prisma/client";
+import { BonusType, PaymentType } from "@prisma/client";
 
 export const getAllBettors = async () => {
   const bettors = await db.user.findMany({
@@ -49,11 +49,11 @@ export const getUserInfo = async (id: number) => {
   const walletBalance = userStata.wallet?.balance || 0;
 
   const totalDeposits = userStata.payments
-    .filter((payment) => payment.type === "deposit")
+    .filter((payment) => payment.type === PaymentType.DEPOSIT)
     .reduce((sum, payment) => sum + payment.amount, 0);
 
   const totalWithdrawals = userStata.payments
-    .filter((payment) => payment.type === "withdrawal")
+    .filter((payment) => payment.type === PaymentType.WITHDRAWAL)
     .reduce((sum, payment) => sum + payment.amount, 0);
 
   const totalTransactions = userStata.payments.length;

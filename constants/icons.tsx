@@ -6,6 +6,7 @@ import {
   CreditCard,
   ArrowUpDown,
   Settings,
+  GroupIcon
 } from "lucide-react";
 
 const ICONS = {
@@ -16,6 +17,7 @@ const ICONS = {
   deposits: <CreditCard className="w-5 h-5" />,
   withdraws: <ArrowUpDown className="w-5 h-5" />,
   settings: <Settings className="w-5 h-5" />,
+  teams: <GroupIcon className="w-5 h-5" />,
 };
 
 export default ICONS;

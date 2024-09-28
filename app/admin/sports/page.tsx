@@ -23,7 +23,7 @@ const page = () => {
     <div>
       <div className="w-full flex justify-between mb-7">
         <div>
-           <h1 className="text-xl font-bold">Parieurs</h1>
+           <h1 className="text-xl font-bold">Leags</h1>
         <p>Contenu de l admin</p>
         </div>
        <div>

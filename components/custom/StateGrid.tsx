@@ -9,13 +9,21 @@ interface Data {
   route: string;
 }
 
-const StateGrid = ({ data, loading }: { data: Data[]; loading: boolean }) => {
+const StateGrid = ({
+  data,
+  loading,
+  loadPlaceholderCount = 8,
+}: {
+  data: Data[];
+  loading: boolean;
+  loadPlaceholderCount: number;
+}) => {
   if (loading) {
     // Indicateur de chargement
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {Array.from({ length: 8 }).map((_, index) => (
-          <div key={index} className="bg-white shadow rounded-lg p-4">
+        {Array.from({ length: loadPlaceholderCount }).map((_, index) => (
+          <div key={index} className="bg-white shadow rounded-lg p-3">
             <div className="animate-pulse h-4 bg-gray-300 rounded w-3/4 mb-2"></div>
             <div className="animate-pulse h-4 bg-gray-300 rounded w-1/2 mb-2"></div>
             <div className="animate-pulse h-4 bg-gray-300 rounded w-5/6 mb-2"></div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { getAllLeagues } from "@/back/admin";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,79 +11,68 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useQuery } from "@tanstack/react-query";
 import { Edit, Eye } from "lucide-react";
 import { useRouter } from "next/navigation";
-
-const leagues = [
-  {
-    name: "Ligue 1",
-    shortName: "L1",
-    slug: "ligue-1",
-    status: "Enabled",
-    logo: "/logos/ligue-1.png",
-  },
-  {
-    name: "Premier League",
-    shortName: "PL",
-    slug: "premier-league",
-    status: "Disabled",
-    logo: "/logos/premier-league.png",
-  }
-];
 
 const LeaguesTable = () => {
   const router = useRouter();
 
-  const gotToTeam = (slug: string) => {
-    router.push(`/admin/teams`);
+  const { data: leagues, isLoading } = useQuery({
+    queryKey: ["leaguesList"],
+    queryFn: () => getAllLeagues(),
+  });
+
+  const goToTeam = (slug: string) => {
+    router.push(`/admin/teams/${slug}`);
   };
+
+  if (isLoading) {
+    return <div>Loading...</div>; // Afficher un message de chargement
+  }
 
   return (
     <Table>
       <TableHeader>
         <TableRow>
           <TableHead>Nom</TableHead>
-          <TableHead>Nom court</TableHead>
           <TableHead>Slug</TableHead>
           <TableHead>Statut</TableHead>
           <TableHead>Action</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
-        {leagues.map((league, index) => (
-          <TableRow key={index}>
+        {leagues?.map((league) => (
+          <TableRow key={league.slug}> {/* Utiliser le slug comme clé */}
             <TableCell>
               <div className="flex items-center">
                 <img
-                  src={league.logo}
+                  src={league.flag} // Assurez-vous que l'attribut est correct (vous aviez 'flag' à l'origine)
                   alt={`${league.name} logo`}
-                  className="w-6 h-6 mr-2"
+                  className="w-12 h-12 mr-2"
                 />
                 {league.name}
               </div>
             </TableCell>
-            <TableCell>{league.shortName}</TableCell>
             <TableCell>{league.slug}</TableCell>
             <TableCell>
               <Badge
-                variant={
-                  league.status === "Enabled" ? "outline" : "destructive"
-                }
+                variant={league.status === "ACTIVE" ? "outline" : "destructive"}
               >
                 {league.status}
               </Badge>
             </TableCell>
             <TableCell>
               <div className="flex space-x-2">
-                {/* <Button
+                <Button
                   variant="outline"
                   size="sm"
                   className="flex items-center space-x-1"
-                  onClick={() => gotToTeam(league.slug)}
+                  onClick={() => goToTeam(league.slug)}
                 >
                   <Eye size={16} />
                   <span>Equipes</span>
-                </Button> */}
+                </Button>
                 <Button
                   variant="outline"
                   size="sm"

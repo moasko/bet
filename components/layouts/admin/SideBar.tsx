@@ -1,50 +1,51 @@
+"use client";
+
 import ICONS from "@/constants/icons";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
+import { usePathname } from "next/navigation"; // Importer le hook usePathname
 
 const navigation = [
   {
     name: "Dashboard",
     href: "/admin",
     icon: ICONS.dashboard,
-    current: true, // Exemple d'élément actif, assurez-vous que ceci est dynamique
   },
   {
     name: "Parieurs",
     href: "/admin/bettors",
     icon: ICONS.bettors,
-    current: false,
+  },
+  {
+    name: "Equipes",
+    href: "/admin/teams",
+    icon: ICONS.teams,
   },
   {
     name: "Jeux",
     href: "/admin/games",
     icon: ICONS.game,
-    current: false,
   },
   {
     name: "Sports",
     href: "/admin/sports",
     icon: ICONS.sports,
-    current: false,
   },
   {
     name: "Dépôts",
     href: "/admin/deposits",
     icon: ICONS.deposits,
-    current: false,
   },
   {
     name: "Retraits",
     href: "/admin/withdraws",
     icon: ICONS.withdraws,
-    current: false,
   },
   {
     name: "Paramètres",
     href: "/admin/settings",
     icon: ICONS.settings,
-    current: false,
   },
 ];
 
@@ -74,9 +75,8 @@ const Item = ({
 };
 
 const SideBar = () => {
-  // Déterminez l'élément actif basé sur la route actuelle
-  // Cela dépend de votre logique de routage, par exemple :
-  const currentPath = "/admin"; // Remplacez par la logique pour obtenir le chemin actuel
+  // Utiliser usePathname pour obtenir le chemin actuel
+  const currentPath = usePathname();
 
   return (
     <aside className="bg-gray-800 text-white w-[250px] fixed min-h-screen">
@@ -91,7 +91,7 @@ const SideBar = () => {
               name={item.name}
               href={item.href}
               icon={item.icon}
-              current={currentPath === item.href} // Dynamique en fonction du chemin actuel
+              current={currentPath === item.href} // Comparer le chemin actuel avec celui de l'élément
             />
           ))}
         </nav>

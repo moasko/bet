@@ -7,4 +7,10 @@ bonus
     L2 = 5%
     L3 = 2%
   }])
-  - Bonus de grade ()
+  - Bonus de grade (
+    conditions (etre eligible gagner 50000xof par mois):{
+        - avoir fait au minimum des depots accumulé de 300000xof et avoir 5 filluels qui aurons fait un depot cumuler chacun de 300000xof 
+    } ainssi de suite * 2
+  )
+
+NB : L=level

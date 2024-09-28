@@ -8,22 +8,24 @@ datasource db {
 }
 
 model User {
-  id            Int            @id @default(autoincrement())
-  name          String
-  email         String         @unique
-  phone         String         @unique
-  password      String
-  referredBy    User?          @relation("UserReferredBy", fields: [referredById], references: [id])
-  referredById  Int?
-  referredUsers User[]         @relation("UserReferredBy")
-  bets          Bet[]
-  statuts       UserStatus     @default(ACTIVE)
-  payments      Payment[]
-  bonuses       Bonus[]
-  createdAt     DateTime       @default(now())
-  wallet        Wallet         @relation(fields: [walletId], references: [id])
-  walletId      Int
-  Notification  Notification[]
+  id             Int            @id @default(autoincrement())
+  name           String
+  email          String         @unique
+  phone          String         @unique
+  password       String
+  emailVerified  Boolean        @default(false)
+  mobileVerified Boolean        @default(false)
+  referredBy     User?          @relation("UserReferredBy", fields: [referredById], references: [id])
+  referredById   Int?
+  referredUsers  User[]         @relation("UserReferredBy")
+  bets           Bet[]
+  statuts        UserStatus     @default(ACTIVE)
+  payments       Payment[]
+  bonuses        Bonus[]
+  createdAt      DateTime       @default(now())
+  wallet         Wallet         @relation(fields: [walletId], references: [id])
+  walletId       Int
+  Notification   Notification[]
 }
 
 enum UserStatus {
@@ -57,20 +59,27 @@ enum MatchStatus {
   FINISHED
 }
 
+enum LeagueStatus {
+  ACTIVE
+  INACTIVE
+}
+
 model League {
-  id        Int      @id @default(autoincrement())
-  name      String   @unique
-  country   String
+  id        Int         @id @default(autoincrement())
+  name      String      @unique
+  slug      String      @unique
   flag      String
+  status    LeagueStatus @default(ACTIVE)
   matches   Match[]
   teams     Team[]
-  createdAt DateTime @default(now())
+  createdAt DateTime    @default(now())
 }
 
 model Team {
   id          Int      @id @default(autoincrement())
   name        String   @unique
-  country     String
+  shortName   String
+  slug        String   @unique
   flag        String
   league      League?  @relation(fields: [leagueId], references: [id]) // Relation to League
   leagueId    Int?
@@ -97,18 +106,30 @@ model Match {
 }
 
 model Payment {
-  id        Int      @id @default(autoincrement())
-  user      User     @relation(fields: [userId], references: [id])
+  id        Int           @id @default(autoincrement())
+  user      User          @relation(fields: [userId], references: [id])
   userId    Int
   amount    Float
-  type      String // "deposit", "withdrawal"
-  status    String // "pending", "completed", "failed"
-  createdAt DateTime @default(now())
+  fee       Float
+  type      PaymentType
+  status    PaymentStatus
+  createdAt DateTime      @default(now())
+}
+
+enum PaymentType {
+  DEPOSIT
+  WITHDRAWAL
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
 }
 
 model Notification {
   id        Int      @id @default(autoincrement())
-  user      User?     @relation(fields: [userId], references: [id])
+  user      User?    @relation(fields: [userId], references: [id])
   userId    Int?
   title     String?
   message   String
