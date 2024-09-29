@@ -181,7 +181,7 @@ export const getAllLeagues = async () => {
 
 // matches
 
-interface Match {
+export interface Match {
   leagueId: number;
   homeTeamId: number;
   awayTeamId: number;
