@@ -1,9 +1,6 @@
 "use client";
 
-import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -12,13 +9,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createNewLeague } from "@/back/admin"; // Assurez-vous d'avoir la bonne fonction pour soumettre une nouvelle ligue
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { createNewLeague } from "@/services/admin"; // Assurez-vous d'avoir la bonne fonction pour soumettre une nouvelle ligue
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { toast } from "sonner";
-import { useEffect } from "react";
 import { LeagueStatus } from "@prisma/client";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import * as z from "zod";
 
 // Définition du type League
 interface League {
@@ -34,8 +34,14 @@ const formSchema = z.object({
   slug: z
     .string()
     .min(1, "Le slug est requis")
-    .regex(/^[a-z0-9-]+$/, "Le slug ne doit contenir que des lettres minuscules, chiffres et tirets"),
-  flag: z.string().url("Veuillez entrer une URL valide pour le drapeau").min(1, "L'URL du drapeau est obligatoire"),
+    .regex(
+      /^[a-z0-9-]+$/,
+      "Le slug ne doit contenir que des lettres minuscules, chiffres et tirets"
+    ),
+  flag: z
+    .string()
+    .url("Veuillez entrer une URL valide pour le drapeau")
+    .min(1, "L'URL du drapeau est obligatoire"),
   status: z.enum(["ACTIVE", "INACTIVE"]),
 });
 
@@ -69,7 +75,8 @@ function AddNewLeague() {
       reset();
     },
     onError: (error: any) => {
-      const message = error?.response?.data?.message || "Erreur lors de l'ajout de la ligue";
+      const message =
+        error?.response?.data?.message || "Erreur lors de l'ajout de la ligue";
       toast.error(message);
       console.error("Erreur lors de l'ajout de la ligue :", error);
     },
@@ -101,12 +108,10 @@ function AddNewLeague() {
         <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 py-4">
           <div>
             <Label htmlFor="name">Nom</Label>
-            <Input
-              type="text"
-              id="name"
-              {...register("name")}
-            />
-            {errors.name && <p className="text-red-600">{errors.name.message}</p>}
+            <Input type="text" id="name" {...register("name")} />
+            {errors.name && (
+              <p className="text-red-600">{errors.name.message}</p>
+            )}
           </div>
           <div>
             <Label htmlFor="slug">Slug (automatique)</Label>
@@ -116,7 +121,9 @@ function AddNewLeague() {
               {...register("slug")}
               disabled // Désactive la saisie manuelle
             />
-            {errors.slug && <p className="text-red-600">{errors.slug.message}</p>}
+            {errors.slug && (
+              <p className="text-red-600">{errors.slug.message}</p>
+            )}
           </div>
           <div>
             <Label htmlFor="flag">URL du Drapeau</Label>
@@ -126,7 +133,9 @@ function AddNewLeague() {
               {...register("flag")}
               placeholder="Entrez l'URL du drapeau"
             />
-            {errors.flag && <p className="text-red-600">{errors.flag.message}</p>}
+            {errors.flag && (
+              <p className="text-red-600">{errors.flag.message}</p>
+            )}
           </div>
           <div>
             <Label htmlFor="status">Statut</Label>
@@ -135,7 +144,9 @@ function AddNewLeague() {
               <option value="ACTIVE">Actif</option>
               <option value="INACTIVE">Inactif</option>
             </select>
-            {errors.status && <p className="text-red-600">{errors.status.message}</p>}
+            {errors.status && (
+              <p className="text-red-600">{errors.status.message}</p>
+            )}
           </div>
           <DialogFooter>
             <Button type="submit" disabled={mutation.isPending}>
