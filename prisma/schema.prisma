@@ -12,7 +12,10 @@ model User {
   name           String
   email          String         @unique
   phone          String         @unique
+  role           UserRols       @default(USER)
   password       String
+  referalCode    String         @unique
+  parainCode     String         @unique
   emailVerified  Boolean        @default(false)
   mobileVerified Boolean        @default(false)
   referredBy     User?          @relation("UserReferredBy", fields: [referredById], references: [id])
@@ -22,10 +25,54 @@ model User {
   statuts        UserStatus     @default(ACTIVE)
   payments       Payment[]
   bonuses        Bonus[]
-  createdAt      DateTime       @default(now())
   wallet         Wallet         @relation(fields: [walletId], references: [id])
   walletId       Int
   Notification   Notification[]
+  accounts       Account[]
+  sessions       Session[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
+
+model Account {
+  id                       Int     @id @default(autoincrement())
+  userId                   Int     @unique
+  type                     String
+  provider                 String
+  providerAccountId        String
+  refresh_token            String?
+  access_token             String?
+  expires_at               Int?
+  token_type               String?
+  scope                    String?
+  id_token                 String?
+  session_state            String?
+  refresh_token_expires_in Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  User      User     @relation(fields: [userId], references: [id])
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           Int      @id @default(autoincrement())
+  sessionToken String   @unique
+  userId       Int
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+enum UserRols {
+  ADMIN
+  USER
 }
 
 enum UserStatus {
@@ -54,6 +101,7 @@ enum BetStatus {
 }
 
 enum MatchStatus {
+  ACTIVE
   PENDING
   IN_PROGRESS
   FINISHED
@@ -65,14 +113,14 @@ enum LeagueStatus {
 }
 
 model League {
-  id        Int         @id @default(autoincrement())
-  name      String      @unique
-  slug      String      @unique
+  id        Int          @id @default(autoincrement())
+  name      String       @unique
+  slug      String       @unique
   flag      String
   status    LeagueStatus @default(ACTIVE)
   matches   Match[]
   teams     Team[]
-  createdAt DateTime    @default(now())
+  createdAt DateTime     @default(now())
 }
 
 model Team {
@@ -81,7 +129,7 @@ model Team {
   shortName   String
   slug        String   @unique
   flag        String
-  league      League?  @relation(fields: [leagueId], references: [id]) // Relation to League
+  league      League?  @relation(fields: [leagueId], references: [id])
   leagueId    Int?
   matchesHome Match[]  @relation("HomeMatches")
   matchesAway Match[]  @relation("AwayMatches")
@@ -89,20 +137,21 @@ model Team {
 }
 
 model Match {
-  id             Int      @id @default(autoincrement())
-  league         League   @relation(fields: [leagueId], references: [id])
+  id             Int         @id @default(autoincrement())
+  league         League      @relation(fields: [leagueId], references: [id])
   leagueId       Int
-  homeTeam       Team     @relation("HomeMatches", fields: [homeTeamId], references: [id])
+  homeTeam       Team        @relation("HomeMatches", fields: [homeTeamId], references: [id])
   homeTeamId     Int
-  awayTeam       Team     @relation("AwayMatches", fields: [awayTeamId], references: [id])
+  awayTeam       Team        @relation("AwayMatches", fields: [awayTeamId], references: [id])
   awayTeamId     Int
-  percentage     Float // Percentage gain for the bet
-  matchStartTime DateTime // Actual match start time
-  betStartTime   DateTime // When betting starts
-  betEndTime     DateTime // When betting ends
-  result         String? // e.g., "2-0"
-  createdAt      DateTime @default(now())
-  bets           Bet[] // Bets placed on this match
+  percentage     Float
+  matchStartTime DateTime
+  betStartTime   DateTime
+  betEndTime     DateTime
+  result         String?
+  createdAt      DateTime    @default(now())
+  bets           Bet[]
+  status         MatchStatus @default(PENDING)
 }
 
 model Payment {
@@ -133,7 +182,7 @@ model Notification {
   userId    Int?
   title     String?
   message   String
-  type      String // "info", "warning", "error"
+  type      String
   createdAt DateTime @default(now())
 }
 
