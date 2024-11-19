@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -12,10 +11,11 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { subtractSolde } from "@/services/user"; // Assurez-vous d'avoir cette fonction définie dans votre backend.
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CircleMinus } from "lucide-react";
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { subtractSolde } from "@/back/user"; // Assurez-vous d'avoir cette fonction définie dans votre backend.
 import { toast } from "sonner";
 
 function SubtractSoldeButton({ user_id }: { user_id: number }) {

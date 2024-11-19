@@ -1,7 +1,5 @@
 "use client";
 
-import { getAllTeams } from "@/back/admin";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -11,9 +9,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { getAllTeams } from "@/services/admin";
 import { useQuery } from "@tanstack/react-query";
 import { Edit, Eye } from "lucide-react";
-import Image from "next/image";
 
 const leagues = [
   {
@@ -27,12 +25,11 @@ const leagues = [
     shortName: "PSG",
     slug: "paris-saint-germain",
     logo: "/logos/premier-league.png",
-  }
+  },
 ];
 
 const TeamsTable = () => {
-
-  const {data,isLoading} = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["teamsList"],
     queryFn: () => getAllTeams(),
   });
@@ -68,7 +65,6 @@ const TeamsTable = () => {
                   variant="outline"
                   size="sm"
                   className="flex items-center space-x-1"
-  
                 >
                   <Eye size={16} />
                   <span>Equipes</span>

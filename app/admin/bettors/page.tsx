@@ -1,11 +1,10 @@
-"use client"
+"use client";
 import BettorsTable from "@/components/custom/tables/BettorsTables";
-import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardHeader,
   CardContent,
   CardFooter,
+  CardHeader,
 } from "@/components/ui/card";
 import {
   Pagination,
@@ -16,10 +15,8 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import React from "react";
 
-const page =  () => {
-
+const page = () => {
   return (
     <div>
       <div className="dlex">

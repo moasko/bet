@@ -1,9 +1,11 @@
-import React from "react";
+import AddNewGame from "@/components/custom/actionsButtons/AddNewGame";
+import GamesTable from "@/components/custom/tables/GamesTable";
+import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardHeader,
   CardContent,
   CardFooter,
+  CardHeader,
 } from "@/components/ui/card";
 import {
   Pagination,
@@ -14,23 +16,22 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import GamesTable from "@/components/custom/tables/GamesTable";
-import { Button } from "@/components/ui/button";
-import AddNewGame from "@/components/custom/actionsButtons/AddNewGame";
 const page = () => {
   return (
     <div>
       <div className="w-full flex justify-between mb-7">
         <div>
-           <h1 className="text-xl font-bold">Parieurs</h1>
-        <p>Contenu de l admin</p>
+          <h1 className="text-xl font-bold">Parieurs</h1>
+          <p>Contenu de l admin</p>
         </div>
-       <div>
-       <div>
-          <Button variant="outline" className="mr-2">Filter</Button>
-          <AddNewGame/>
+        <div>
+          <div>
+            <Button variant="outline" className="mr-2">
+              Filter
+            </Button>
+            <AddNewGame />
+          </div>
         </div>
-       </div>
       </div>
       <Card className="p-4">
         <CardHeader className="flex justify-between"></CardHeader>

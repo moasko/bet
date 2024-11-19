@@ -1,14 +1,13 @@
 "use client";
 
-import { getUserInfo } from "@/back/user";
 import AddSoldeButton from "@/components/custom/actionsButtons/AddSoldeButton";
 import LockUserButton from "@/components/custom/actionsButtons/LockUserButton";
 import SubstractSoldeButton from "@/components/custom/actionsButtons/SubstractSoldeButton";
 import StateGrid from "@/components/custom/StateGrid";
 import { Button } from "@/components/ui/button";
+import { getUserInfo } from "@/services/user";
 import { useQuery } from "@tanstack/react-query";
-import { CirclePlus, Bell } from "lucide-react";
-import React from "react";
+import { Bell, CirclePlus } from "lucide-react";
 import UserProfileForme from "./_components/UserProfileForme";
 
 function BettorDetailsPage({ params }: { params: { id: string } }) {
@@ -19,7 +18,6 @@ function BettorDetailsPage({ params }: { params: { id: string } }) {
     queryFn: () => getUserInfo(Number(id)),
     enabled: !!id,
   });
-
 
   return (
     <div>

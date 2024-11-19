@@ -1,6 +1,12 @@
 "use client";
 
-import { HomeIcon, UserIcon, MenuIcon, TrophyIcon, TicketIcon } from "lucide-react";
+import {
+  HomeIcon,
+  MenuIcon,
+  TicketIcon,
+  TrophyIcon,
+  UserIcon,
+} from "lucide-react";
 import React from "react";
 import NavLink from "./navigation/NavLink";
 
@@ -12,7 +18,7 @@ interface NavLinkProps {
 
 const navLinks: NavLinkProps[] = [
   {
-    href: "/sports",
+    href: "/",
     label: "Sports",
     icon: <TrophyIcon size={20} />, // Taille des icônes ajustée à 20px
   },
@@ -40,7 +46,7 @@ const navLinks: NavLinkProps[] = [
 
 function Navigation() {
   return (
-    <div className="flex shadow-sm shadow-slate-500 fixed w-full bottom-0 left-0 justify-between items-center p-2 bg-white">
+    <div className="flex shadow-sm shadow-slate-500 fixed w-full bottom-0 left-0 z-50 justify-between items-center p-2 bg-white">
       <div className="flex justify-between items-center w-full">
         {navLinks.map((link) => (
           <NavLink key={link.href} {...link} />
