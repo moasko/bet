@@ -1,6 +1,5 @@
 "use client";
 
-import { getAllLeagues } from "@/back/admin";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { getAllLeagues } from "@/services/admin";
 import { useQuery } from "@tanstack/react-query";
 import { Edit, Eye } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -43,7 +43,9 @@ const LeaguesTable = () => {
       </TableHeader>
       <TableBody>
         {leagues?.map((league) => (
-          <TableRow key={league.slug}> {/* Utiliser le slug comme clé */}
+          <TableRow key={league.slug}>
+            {" "}
+            {/* Utiliser le slug comme clé */}
             <TableCell>
               <div className="flex items-center">
                 <img
