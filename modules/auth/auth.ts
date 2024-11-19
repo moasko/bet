@@ -3,9 +3,13 @@ import NextAuth from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 
 import db from "@/lib/db";
-import { UserRols } from "@prisma/client";
 import authConfig from "./auth.config";
 import userRepository from "./data/user";
+
+type UserRols = {
+  ADMIN: "ADMIN";
+  USER: "USER";
+};
 
 export const nextAuth = NextAuth({
   pages: {
