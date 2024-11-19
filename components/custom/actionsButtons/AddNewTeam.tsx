@@ -1,9 +1,6 @@
 "use client";
 
-import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -12,15 +9,20 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createNewTeam } from "@/back/admin";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { createNewTeam } from "@/services/admin";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { toast } from "sonner";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
+import { useForm, useWatch } from "react-hook-form";
+import { toast } from "sonner";
+import * as z from "zod";
+import LeaguSelectList from "./LeaguSelectList";
 
 interface Team {
   name: string;
+  leagueId: number;
   shortName: string;
   flag: string;
   slug: string;
@@ -28,6 +30,7 @@ interface Team {
 
 const formSchema = z.object({
   name: z.string().min(2, "Le nom est obligatoire"),
+  leagueId: z.number().min(1, "La ligue est obligatoire"),
   shortName: z.string().min(2, "Le nom court est obligatoire"),
   slug: z
     .string()
@@ -62,6 +65,10 @@ function AddNewTeam() {
   });
 
   const queryClient = useQueryClient();
+
+  const leagueId = useWatch({
+    name: "leagueId",
+  });
 
   const mutation = useMutation({
     mutationFn: (data: Team) => createNewTeam(data),
@@ -101,6 +108,10 @@ function AddNewTeam() {
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="grid gap-4 py-4">
+            <LeaguSelectList
+              leagueId={1}
+              setLeagueId={(id) => register("leagueId")}
+            />
             <div className="flex flex-col items-center">
               <Label htmlFor="flag" className="text-right">
                 URL de l image (drapeau)
