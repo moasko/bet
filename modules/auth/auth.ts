@@ -2,18 +2,15 @@ import NextAuth from "next-auth";
 
 import { PrismaAdapter } from "@auth/prisma-adapter";
 
-import db from "@/lib/db";
+import { getUserById } from "@/actions/user";
+import { db } from "@/lib/db";
+import { UserRols } from "@prisma/client";
 import authConfig from "./auth.config";
-import userRepository from "./data/user";
-
-type UserRols = {
-  ADMIN: "ADMIN";
-  USER: "USER";
-};
 
 export const nextAuth = NextAuth({
   pages: {
     signIn: "/auth/signin",
+    newUser: "/auth/signup",
     verifyRequest: "/auth/verify-request",
     error: "/auth-error",
     signOut: "/signout",
@@ -24,7 +21,7 @@ export const nextAuth = NextAuth({
       if (provider !== "credentials" && provider !== "http-email") return true;
 
       if (!user || !user.id) return false;
-      const existingUser = await userRepository.getUserById(Number(user.id));
+      const existingUser = await getUserById(Number(user.id));
 
       if (
         !existingUser ||
@@ -42,11 +39,10 @@ export const nextAuth = NextAuth({
       const { token, user } = jwt;
 
       if (!token.sub) return token;
-      const existingUser = await userRepository.getUserById(Number(token.sub));
+      const existingUser = await getUserById(Number(token.sub));
       if (!existingUser) return token;
       token.email = existingUser.email;
       token.name = existingUser.name;
-
       token.role = existingUser.role;
       return token;
     },
@@ -64,7 +60,6 @@ export const nextAuth = NextAuth({
     },
   },
   adapter: PrismaAdapter(db),
-
   session: { strategy: "jwt" },
   trustHost: authConfig.trustHost,
 

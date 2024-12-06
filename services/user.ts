@@ -1,6 +1,6 @@
 "use server";
 
-import db from "@/lib/db";
+import { db } from "@/lib/db";
 import { currencyToXOF } from "@/lib/utils";
 import { BonusType, PaymentType } from "@prisma/client";
 import { endOfWeek, startOfWeek } from "date-fns";

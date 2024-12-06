@@ -52,3 +52,17 @@ export const formatResult = (
     awayTeamResult: away,
   };
 };
+
+export const generateReferralCode = (length: number) => {
+  if (length <= 0) {
+    throw new Error("Referral code length must be a positive number");
+  }
+
+  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let code = "";
+  for (let i = 0; i < length; i++) {
+    code += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+
+  return code;
+};

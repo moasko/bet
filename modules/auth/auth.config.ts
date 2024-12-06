@@ -1,25 +1,25 @@
-import bcrypt from "bcrypt";
+import bcryptjs from "bcryptjs";
 
 import type { NextAuthConfig } from "next-auth";
 
+import { getUserByEmail } from "@/actions/user";
 import Credentials from "next-auth/providers/credentials";
 import { LoginSchema } from "./auth.schema";
-import userRepository from "./data/user";
 export default {
   trustHost: true,
   providers: [
     Credentials({
       credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
+        email: {},
+        password: {},
       },
-      async authorize(credentials) {
+      authorize: async (credentials) => {
         const validate = await LoginSchema.parseAsync(credentials);
         if (!validate) return null;
         const { email, password } = validate;
-        const user = await userRepository.getUserByEmail(email);
+        const user = await getUserByEmail(email);
         if (!user || !user.password) return null;
-        const matched = await bcrypt.compare(password, user.password);
+        const matched = await bcryptjs.compare(password, user.password);
         if (matched) return user;
         return user;
       },

@@ -68,7 +68,7 @@ function LoginForm() {
           <a href="#" className="text-gray-600 hover:underline">
             Mot de passe oublié ?
           </a>
-          <Link href="/register" className="text-red-600 hover:underline">
+          <Link href="/auth/signup" className="text-red-600 hover:underline">
             Inscription
           </Link>
         </div>

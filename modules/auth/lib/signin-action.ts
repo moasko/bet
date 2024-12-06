@@ -50,7 +50,7 @@ export async function signInAction(
 }
 
 import { signOut } from "@/auth";
-import db from "@/lib/db";
+import { db } from "@/lib/db";
 import { LoginSchema, LoginSchemaType } from "../auth.schema";
 import { MessageResponse } from "../types/auth";
 

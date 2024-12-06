@@ -15,7 +15,7 @@ model User {
   role           UserRols       @default(USER)
   password       String
   referalCode    String         @unique
-  parainCode     String         @unique
+  parainCode     String
   emailVerified  Boolean        @default(false)
   mobileVerified Boolean        @default(false)
   referredBy     User?          @relation("UserReferredBy", fields: [referredById], references: [id])
@@ -25,8 +25,7 @@ model User {
   statuts        UserStatus     @default(ACTIVE)
   payments       Payment[]
   bonuses        Bonus[]
-  wallet         Wallet         @relation(fields: [walletId], references: [id])
-  walletId       Int
+  wallet         Wallet?
   Notification   Notification[]
   accounts       Account[]
   sessions       Session[]
@@ -213,8 +212,8 @@ enum BonusType {
 
 model Wallet {
   id        Int      @id @default(autoincrement())
-  user      User[]
-  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int      @unique
   balance   Float
   createdAt DateTime @default(now())
 }

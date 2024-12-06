@@ -1,4 +1,7 @@
 import { createEnv } from "@t3-oss/env-nextjs";
+import { AUTOMATIC_FONT_OPTIMIZATION_MANIFEST } from "next/dist/shared/lib/constants";
+import { Jersey_10 } from "next/font/google";
+import { FaUserFriends } from "react-icons/fa";
 
 import { z } from "zod";
 
