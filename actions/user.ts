@@ -21,6 +21,14 @@ const getUserByEmail = async (email: string) => {
   }
 };
 
+/**
+ * Finds a user by their phone number.
+ *
+ * @param phone - The phone number to search for.
+ * @returns The user with the given phone number, or null if no user is found.
+ * @throws If there is an error with the database, an error is thrown with a
+ *   message indicating that the verification of the phone number failed.
+ */
 const getUserByPhone = async (phone: string) => {
   try {
     return await db.user.findFirst({
@@ -29,6 +37,36 @@ const getUserByPhone = async (phone: string) => {
   } catch (error) {
     handleError("getUserByPhone", error);
     throw new Error("Erreur lors de la vérification du numéro de téléphone.");
+  }
+};
+
+const getUserById = async (userId: number) => {
+  try {
+    return await db.user.findUnique({ where: { id: userId } });
+  } catch (error) {
+    handleError("getUserById", error);
+    throw new Error("Erreur lors de la récupération du user par id");
+  }
+};
+
+const getUserWallet = async (userId: number) => {
+  try {
+    return await db.wallet.findUnique({ where: { userId } });
+  } catch (error) {
+    handleError("getUserWallet", error);
+    throw new Error("Erreur lors de la récupération du wallet par user id");
+  }
+};
+
+const getUserWallerBalance = async (userId: number) => {
+  try {
+    return db.wallet.findUnique({
+      where: {
+        userId,
+      },
+    });
+  } catch (error) {
+    handleError("getUserWallet", error);
   }
 };
 
@@ -125,29 +163,12 @@ const registerUser = async ({
   }
 };
 
-const validateCredentials = async (email: string, password: string) => {
-  try {
-    const user = await getUserByEmail(email);
-    if (!user || !user.password) {
-      throw new Error("Email ou mot de passe incorrect.");
-    }
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      throw new Error("Email ou mot de passe incorrect.");
-    }
-    return true;
-  } catch (error) {
-    handleError("validateCredentials", error);
-    throw new Error(
-      "Une erreur s'est produite lors de la validation des identifiants."
-    );
-  }
-};
-
 export {
   getUserByEmail,
+  getUserById,
   getUserByPhone,
   getUserParrainWithCode,
+  getUserWallerBalance,
+  getUserWallet,
   registerUser,
-  validateCredentials,
 };

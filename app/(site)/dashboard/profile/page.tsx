@@ -3,33 +3,11 @@
 import SimpleLayout from "@/components/layouts/app/SimpleLayout";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import {
-  ArrowBigRight,
-  ArrowRight,
-  Download,
-  History,
-  List,
-  Lock,
-  LogOut,
-  Mail,
-  Settings,
-  Upload,
-  UserCog,
-  UserPlus,
-  Users,
-} from "lucide-react";
-import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Mail, Settings, UserCog, Users } from "lucide-react";
 import Link from "next/link";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Badge } from "@/components/ui/badge";
-import ProfileTab from "./_componenets/ProfileTab";
 import EquipeContent from "./_componenets/EquipeContent";
+import ProfileTab from "./_componenets/ProfileTab";
 
 // Contenu des onglets
 const tabContents = {
@@ -37,9 +15,6 @@ const tabContents = {
   referals: "Manage your referral team here.",
   settings: "Adjust your account settings here.",
 };
-
-
-
 
 const Page = () => {
   return (

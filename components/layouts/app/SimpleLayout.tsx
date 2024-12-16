@@ -23,7 +23,7 @@ const SimpleLayout: React.FC<Props> = ({
   goBackLabel = "",
 }) => {
   return (
-    <div className={`min-h-full flex-1 relative ${bgClass}`}>
+    <div className={`min-h-screen flex-1 relative ${bgClass}`}>
       {showHeader && (
         <Header
           goBackLabel={goBackLabel}
@@ -34,6 +34,7 @@ const SimpleLayout: React.FC<Props> = ({
       <main>{children}</main>
       <Navigation />
       {showFooter && <Footer />}
+      <div className=" h-16 w-full"></div>
     </div>
   );
 };

@@ -4,7 +4,7 @@ import SimpleLayout from "@/components/layouts/app/SimpleLayout";
 
 const PageConnexion = () => {
   return (
-    <SimpleLayout showSecondHeader={false}>
+    <SimpleLayout showFooter={false} showSecondHeader={false}>
       <LoginForm />
     </SimpleLayout>
   );

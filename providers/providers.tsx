@@ -1,12 +1,9 @@
 "use client";
 
-import {
-  isServer,
-  QueryClient,
-  QueryClientProvider,
-} from "@tanstack/react-query";
-import React from "react";
 import { Toaster } from "@/components/ui/sonner";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { SessionProvider } from "next-auth/react";
+import React from "react";
 
 function makeQueryClient() {
   return new QueryClient({
@@ -21,9 +18,11 @@ function makeQueryClient() {
 let browserQueryClient: QueryClient;
 
 function getQueryClient() {
-  if (isServer) {
+  if (typeof window === "undefined") {
+    // En environnement serveur
     return makeQueryClient();
   } else {
+    // En environnement client
     if (!browserQueryClient) browserQueryClient = makeQueryClient();
     return browserQueryClient;
   }
@@ -33,9 +32,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const queryClient = getQueryClient();
 
   return (
-    <QueryClientProvider client={queryClient}>
-      {children}
-      <Toaster />
-    </QueryClientProvider>
+    <SessionProvider>
+      <QueryClientProvider client={queryClient}>
+        {children}
+        <Toaster />
+      </QueryClientProvider>
+    </SessionProvider>
   );
 }

@@ -24,7 +24,7 @@ export const useCountdown = (targetDate: any) => {
       setTimeLeft(calculateTimeLeft(targetDate));
     }, 1000);
 
-    return () => clearTimeout(timer); // Clear timer on unmount
+    return () => clearTimeout(timer);
   }, [targetDate, timeLeft]);
 
   return timeLeft;

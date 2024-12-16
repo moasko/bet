@@ -22,7 +22,7 @@ export const getAllBettors = async () => {
     email: bettor.email,
     phone: bettor.phone,
     joinDate: bettor.createdAt.toISOString(),
-    balance: currencyToXOF(bettor.wallet.balance),
+    balance: currencyToXOF(bettor.wallet?.balance || 0),
     status: bettor.statuts,
   }));
 
@@ -174,10 +174,10 @@ export const addSolde = async (userId: number, amount: number) => {
 
   await db.wallet.update({
     where: {
-      id: user.wallet.id,
+      id: user.wallet?.id,
     },
     data: {
-      balance: user.wallet.balance + amount,
+      balance: user.wallet?.balance || 0 + amount,
     },
   });
 
@@ -209,10 +209,10 @@ export const subtractSolde = async (userId: number, amount: number) => {
 
   await db.wallet.update({
     where: {
-      id: user.wallet.id,
+      id: user.wallet?.id,
     },
     data: {
-      balance: user.wallet.balance - amount,
+      balance: user.wallet?.balance || 0 - amount,
     },
   });
 

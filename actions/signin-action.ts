@@ -3,9 +3,7 @@
 import { signIn } from "@/auth";
 import { AuthError } from "next-auth";
 
-export async function signInAction(
-  data: LoginSchemaType
-): Promise<MessageResponse> {
+export async function signInAction(data: LoginSchemaType) {
   const validate = await LoginSchema.safeParseAsync(data);
   if (!validate.success) {
     return {
@@ -30,6 +28,7 @@ export async function signInAction(
     await signIn("credentials", {
       email,
       password,
+      redirectTo: "/",
     });
 
     return {
@@ -52,6 +51,5 @@ export async function signInAction(
 import { signOut } from "@/auth";
 import { db } from "@/lib/db";
 import { LoginSchema, LoginSchemaType } from "../auth.schema";
-import { MessageResponse } from "../types/auth";
 
 export { signOut };

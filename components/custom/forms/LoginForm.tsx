@@ -1,24 +1,43 @@
 "use client";
+
+import { signInAction } from "@/actions/signin-action";
+import { useMutation } from "@tanstack/react-query";
+import { EyeIcon, EyeOffIcon } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 function LoginForm() {
-  const [formData, setFormData] = useState({
-    emailOuTelephone: "",
-    motDePasse: "",
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
+  const [showPassword, setShowPassword] = useState(false);
+
+  // Mutation for signing in
+  const mutation = useMutation({
+    mutationFn: signInAction,
+    onSuccess: (data) => {
+      if (data.success) {
+        toast.success("Login successful!");
+        // Handle post-login logic (e.g., redirect)
+      } else {
+        toast.error(data.message || "Invalid credentials.");
+      }
+    },
+    onError: (error) => {
+      console.error("Error during login:", error);
+      toast.error("An unexpected error occurred. Please try again.");
+    },
   });
 
-  const gererChangementInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
+  const onSubmit = (formData: any) => {
+    mutation.mutate({
+      email: formData.emailOrPhone,
+      password: formData.password,
     });
-  };
-
-  const gererSoumission = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Logique de connexion ici
-    console.log("Tentative de connexion", formData);
   };
 
   return (
@@ -26,50 +45,93 @@ function LoginForm() {
       <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
         Connexion
       </h2>
-      <form onSubmit={gererSoumission} className="space-y-4">
-        {/* Champ Téléphone ou Email */}
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        {/* Email or Phone Field */}
         <div>
           <input
             type="text"
-            name="name"
-            placeholder="Email ou Téléphone"
-            required
-            value={formData.emailOuTelephone}
-            onChange={gererChangementInput}
-            className="mt-1 text-sm block w-full p-4 bg-white rounded"
+            {...register("emailOrPhone", {
+              required: "Email or phone is required.",
+              minLength: {
+                value: 5,
+                message: "Must be at least 5 characters long.",
+              },
+            })}
+            placeholder="Email or Phone"
+            aria-label="Email or Phone"
+            aria-invalid={!!errors.emailOrPhone}
+            className={`mt-1 text-sm block w-full p-4 bg-white rounded ${
+              errors.emailOrPhone ? "border-red-500 border" : ""
+            }`}
+            disabled={mutation.isPending}
           />
+          {errors.emailOrPhone && (
+            <p className="text-red-500 text-xs mt-1" aria-live="assertive">
+              {errors.root?.message || "Invalid email or phone."}
+            </p>
+          )}
         </div>
 
-        {/* Champ Mot de Passe */}
-        <div>
+        {/* Password Field */}
+        <div className="relative">
           <input
-            type="password"
-            name="motDePasse"
-            placeholder="Email ou Téléphone"
-            required
-            value={formData.motDePasse}
-            onChange={gererChangementInput}
-            className="mt-1 text-sm block w-full p-4 bg-white rounded"
+            type={showPassword ? "text" : "password"}
+            {...register("password", {
+              required: "Password is required.",
+              minLength: {
+                value: 6,
+                message: "Password must be at least 6 characters long.",
+              },
+            })}
+            placeholder="Password"
+            aria-label="Password"
+            aria-invalid={!!errors.password}
+            className={`mt-1 text-sm block w-full p-4 bg-white rounded ${
+              errors.password ? "border-red-500 border" : ""
+            }`}
+            autoComplete="off"
+            disabled={mutation.isPending}
           />
+          <button
+            type="button"
+            onClick={() => setShowPassword((prev) => !prev)}
+            className="absolute top-1/2 right-4 transform -translate-y-1/2 text-gray-600"
+            aria-label="Toggle password visibility"
+          >
+            {showPassword ? <EyeIcon size={16} /> : <EyeOffIcon size={16} />}
+          </button>
+          {errors.password && (
+            <p className="text-red-500 text-xs mt-1" aria-live="assertive">
+              {errors.root?.message || "Invalid password."}
+            </p>
+          )}
         </div>
 
-        {/* Bouton Connexion */}
+        {/* Submit Button */}
         <div>
           <button
             type="submit"
-            className="w-full p-[10px] bg-[#ffcd05] rounded"
+            disabled={mutation.isPending}
+            className={`w-full p-[10px] bg-[#ffcd05] rounded ${
+              mutation.isPending
+                ? "opacity-50 cursor-not-allowed"
+                : "hover:bg-[#e6b804]"
+            }`}
           >
-            CONNEXION
+            {mutation.isPending ? "Logging in..." : "LOGIN"}
           </button>
         </div>
 
-        {/* Liens Mot de Passe Oublié et Inscription */}
+        {/* Links for Forgot Password and Signup */}
         <div className="flex items-center justify-between text-sm mt-4">
-          <a href="#" className="text-gray-600 hover:underline">
-            Mot de passe oublié ?
-          </a>
+          <Link
+            href="/auth/forgot-password"
+            className="text-gray-600 hover:underline"
+          >
+            Forgot password?
+          </Link>
           <Link href="/auth/signup" className="text-red-600 hover:underline">
-            Inscription
+            Sign up
           </Link>
         </div>
       </form>

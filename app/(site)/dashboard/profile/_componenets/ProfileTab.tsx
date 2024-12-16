@@ -1,9 +1,9 @@
+import SignoutButton from "@/components/custom/forms/SignoutButton";
 import {
   Download,
   History,
   List,
   Lock,
-  LogOut,
   Upload,
   UserCog,
   UserPlus,
@@ -75,8 +75,7 @@ const ProfileTab = () => {
             <span>Invitez des amis</span>
           </li>
           <li className="flex items-center py-2 border-t gap-2">
-            <LogOut color="gray" size={20} />
-            <span>Déconnexion</span>
+            <SignoutButton />
           </li>
         </ul>
       </div>

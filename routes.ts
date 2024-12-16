@@ -1,6 +1,6 @@
 export const publicRoutes = [
   "/",
-  "/invited/",
+  "/invited",
   // ajoutez d'autres routes publiques ici
 ];
 
@@ -12,4 +12,4 @@ export const authRoutes = [
 
 export const apiAuthPrefix = "/api/auth";
 
-export const DEFAULT_LOGIN_REDIRECT = "/admin";
+export const DEFAULT_LOGIN_REDIRECT = "/";
