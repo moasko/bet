@@ -1,0 +1,38 @@
+version: "3.8"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=mysql://betapp:betpassword@db:3306/betdb
+      - NEXTAUTH_SECRET=your-local-secret
+      - NEXTAUTH_URL=http://localhost:3000
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - db
+    command: npm run dev
+
+  db:
+    image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password --bind-address=0.0.0.0
+    restart: always
+    environment:
+      - MYSQL_DATABASE=betdb
+      - MYSQL_USER=betapp
+      - MYSQL_PASSWORD=betpassword
+      - MYSQL_ROOT_PASSWORD=rootpassword
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "3306:3306"
+
+volumes:
+  mysql_data:
