@@ -50,11 +50,8 @@ function BetForm() {
     <div>
       <Drawer>
         <DrawerTrigger asChild>
-          <Button
-            size={"lg"}
-            className="w-full bg-red-500 text-white rounded-lg"
-          >
-            Ouvrir Formulaire de Pari
+          <Button className=" bg-red-500 text-white rounded-sm w-full">
+            Placer un pari
           </Button>
         </DrawerTrigger>
         <DrawerContent>

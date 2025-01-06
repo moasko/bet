@@ -20,15 +20,17 @@ export const currencyToXOF = (amount: number = 0): string => {
   return `${amount} XOF`;
 };
 
-export const currentChange = (
-  amount: number = 0,
-  symbole: Symboles
+export const currentcyChange = (
+  { amount, symbole }: CurrencysSymbolProps = {
+    amount: 0,
+    symbole: Symboles.XOF,
+  }
 ): string => {
   switch (symbole) {
     case Symboles.XOF:
       return `${amount} XOF`;
     case Symboles.USD:
-      const convertedAmount = (amount * 0.0017).toFixed(2);
+      const convertedAmount = (amount / 635).toFixed(2);
       return `${convertedAmount} USD`;
     default:
       return `${amount}`;
@@ -65,4 +67,14 @@ export const generateReferralCode = (length: number) => {
   }
 
   return code;
+};
+
+export const cu = (amount: number, selectedCurrency: string): number => {
+  const exchangeRate = 650;
+
+  if (selectedCurrency === "USD") {
+    return amount / exchangeRate; // Conversion en USD
+  }
+
+  return amount; // Retourne le montant en XOF si la devise est XOF
 };

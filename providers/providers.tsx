@@ -1,9 +1,14 @@
 "use client";
 
+import { UserSyncProvider } from "@/components/providers/UserSyncProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SessionProvider } from "next-auth/react";
 import React from "react";
+
+interface ProvidersProps {
+  children: React.ReactNode;
+}
 
 function makeQueryClient() {
   return new QueryClient({
@@ -28,15 +33,17 @@ function getQueryClient() {
   }
 }
 
-export function Providers({ children }: { children: React.ReactNode }) {
+export function Providers({ children }: ProvidersProps) {
   const queryClient = getQueryClient();
 
   return (
     <SessionProvider>
-      <QueryClientProvider client={queryClient}>
-        {children}
-        <Toaster />
-      </QueryClientProvider>
+      <UserSyncProvider>
+        <QueryClientProvider client={queryClient}>
+          {children}
+          <Toaster />
+        </QueryClientProvider>
+      </UserSyncProvider>
     </SessionProvider>
   );
 }

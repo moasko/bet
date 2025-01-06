@@ -228,11 +228,10 @@ export const subtractSolde = async (userId: number, amount: number) => {
 };
 
 export const getMatches = async () => {
-  // Calculer les dates de début et de fin de la semaine actuelle
   const startOfThisWeek = startOfWeek(new Date(), { weekStartsOn: 1 }); // Lundi
   const endOfThisWeek = endOfWeek(new Date(), { weekStartsOn: 1 }); // Dimanche
+  const currentDate = new Date(); // Date actuelle
 
-  // Récupérer les matchs qui ont lieu entre ces deux dates
   const matches = await db.match.findMany({
     orderBy: {
       matchStartTime: "asc",
@@ -241,6 +240,7 @@ export const getMatches = async () => {
       matchStartTime: {
         gte: startOfThisWeek, // Matchs à partir du début de la semaine
         lte: endOfThisWeek, // Matchs jusqu'à la fin de la semaine
+        gte: currentDate, // Ne récupérer que les matchs dont la date de début est supérieure ou égale à la date actuelle
       },
     },
     include: {
@@ -254,18 +254,48 @@ export const getMatches = async () => {
 };
 
 export const getActiveMatche = async () => {
-  const activeMatches = await db.match.findFirst({
-    where: {
-      status: "ACTIVE",
-    },
-    include: {
-      awayTeam: true,
-      homeTeam: true,
-      league: true,
-    },
-  });
+  try {
+    const activeMatch = await db.match.findFirst({
+      where: {
+        status: "ACTIVE",
+      },
+      include: {
+        awayTeam: {
+          select: {
+            id: true,
+            name: true,
+            shortName: true,
+            flag: true,
+          },
+        },
+        homeTeam: {
+          select: {
+            id: true,
+            name: true,
+            shortName: true,
+            flag: true,
+          },
+        },
+        league: {
+          select: {
+            id: true,
+            name: true,
+            flag: true,
+          },
+        },
+      },
+    });
 
-  return activeMatches;
+    if (!activeMatch) {
+      console.warn("Aucun match actif trouvé.");
+      return null;
+    }
+
+    return activeMatch;
+  } catch (error) {
+    console.error("Erreur lors de la récupération du match actif :", error);
+    throw new Error("Impossible de récupérer le match actif.");
+  }
 };
 
 export const getMatch = async (id: number) => {

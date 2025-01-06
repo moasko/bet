@@ -19,224 +19,235 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { createNewMatch, getAllLeagues, getLeaguTeams } from "@/services/admin";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { z } from "zod";
+
+// Schéma de validation avec Zod
+const gameSchema = z
+  .object({
+    leagueId: z.number({ required_error: "La ligue est obligatoire." }),
+    teamOne: z.number({ required_error: "L'équipe une est obligatoire." }),
+    teamTwo: z.number({ required_error: "L'équipe deux est obligatoire." }),
+    matchStartTime: z
+      .string()
+      .min(1, "La date de début du jeu est obligatoire.")
+      .refine((value) => new Date(value) > new Date(), {
+        message: "La date doit être dans le futur.",
+      }),
+    percentage: z.number().min(0, "Le pourcentage ne peut pas être négatif."),
+    teamOneGoals: z.number().min(0, "Les buts doivent être positifs."),
+    teamTwoGoals: z.number().min(0, "Les buts doivent être positifs."),
+  })
+  .refine((data) => data.teamOne !== data.teamTwo, {
+    message: "Les deux équipes doivent être différentes.",
+    path: ["teamTwo"],
+  });
+
+type GameFormData = z.infer<typeof gameSchema>;
 
 function AddNewGame() {
-  const [leagueId, setLeagueId] = useState<number | null>(null);
-  const [teamOne, setTeamOne] = useState<number | null>(null);
-  const [teamTwo, setTeamTwo] = useState<number | null>(null);
-  const [gameStarts, setGameStarts] = useState<string>("");
-  const [betStarts, setBetStarts] = useState<string>("");
-  const [betEnds, setBetEnds] = useState<string>("");
-  const [percentage, setPercentage] = useState<number>(0.2);
-  const [teamOneGoals, setTeamOneGoals] = useState<number | null>(null);
-  const [teamTwoGoals, setTeamTwoGoals] = useState<number | null>(null);
-
   const queryClient = useQueryClient();
+  const [leagueId, setLeagueId] = useState<number | null>(null);
 
-  // Mutation for creating a new game
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+    reset,
+  } = useForm<GameFormData>({
+    resolver: zodResolver(gameSchema),
+  });
+
   const mutateGame = useMutation({
     mutationFn: createNewMatch,
     onSuccess: () => {
-      toast("Jeu créé avec succès.");
-      queryClient.invalidateQueries({
-        queryKey: ["gamesList"],
-      });
-      setLeagueId(null);
-      setTeamOne(null);
-      setTeamTwo(null);
-      setGameStarts("");
-      setBetStarts("");
-      setBetEnds("");
-      setPercentage(0.2);
-      setTeamOneGoals(null);
-      setTeamTwoGoals(null);
+      toast.success("Jeu créé avec succès.");
+      queryClient.invalidateQueries({ queryKey: ["gamesList"] });
+      reset();
+    },
+    onError: () => {
+      toast.error("Erreur lors de la création du jeu.");
     },
   });
 
-  // Fetch leagues
-  const { data: leagueData, isLoading: leagueLoading } = useQuery({
+  // Requête pour obtenir les ligues
+  const { data: leagueData } = useQuery({
     queryKey: ["leagues"],
-    queryFn: () => getAllLeagues(),
+    queryFn: getAllLeagues,
   });
 
-  // Fetch teams for a selected league
-  const { data: teamData, isLoading: teamLoading } = useQuery({
+  // Requête pour obtenir les équipes d'une ligue
+  const {
+    data: teamData,
+    isLoading: isTeamsLoading,
+    isError: isTeamsError,
+  } = useQuery({
     queryKey: ["teams", leagueId],
     queryFn: () => getLeaguTeams(leagueId!),
     enabled: !!leagueId,
   });
 
-  const handleSubmit = () => {
-    if (
-      !leagueId ||
-      !teamOne ||
-      !teamTwo ||
-      !gameStarts ||
-      !betStarts ||
-      !betEnds ||
-      !percentage ||
-      teamOneGoals === null ||
-      teamTwoGoals === null
-    ) {
-      alert("Veuillez remplir tous les champs.");
-      return;
-    }
-
-    // Mutate (create new match)
+  const onSubmit = (data: GameFormData) => {
     mutateGame.mutate({
-      leagueId,
-      homeTeamId: teamOne,
-      awayTeamId: teamTwo,
-      percentage,
-      matchStartTime: new Date(gameStarts).toISOString(),
-      betStartTime: new Date(betStarts).toISOString(),
-      betEndTime: new Date(betEnds).toISOString(),
-      result: `${teamOneGoals}-${teamTwoGoals}`,
+      leagueId: data.leagueId,
+      homeTeamId: data.teamOne,
+      awayTeamId: data.teamTwo,
+      percentage: data.percentage,
+      matchStartTime: new Date(data.matchStartTime).toISOString(),
+      result: `${data.teamOneGoals}-${data.teamTwoGoals}`,
     });
   };
 
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="space-x-3">+ Ajouter Un Nouveau Jeu</Button>
+        <Button>+ Ajouter Un Nouveau Jeu</Button>
       </DialogTrigger>
       <DialogContent className="max-w-[800px]">
         <DialogHeader>
           <DialogTitle>Ajouter Un Nouveau Jeu</DialogTitle>
         </DialogHeader>
-        <div className="grid gap-4 py-4 grid-cols-1 sm:grid-cols-2">
-          {/* League Selection */}
-          <div className="col-span-1 sm:col-span-2">
-            <Label htmlFor="league">Ligue</Label>
-            <Select onValueChange={(value) => setLeagueId(Number(value))}>
-              <SelectTrigger id="league">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="grid gap-4 grid-cols-1 sm:grid-cols-2"
+        >
+          {/* Ligue */}
+          <div className="col-span-2">
+            <Label>Ligue</Label>
+            <Select
+              onValueChange={(value) => {
+                setLeagueId(Number(value));
+                setValue("leagueId", Number(value));
+              }}
+            >
+              <SelectTrigger>
                 <SelectValue placeholder="Sélectionnez une ligue" />
               </SelectTrigger>
               <SelectContent>
                 {leagueData?.map((league: any) => (
-                  <SelectItem key={league.id} value={league.id}>
+                  <SelectItem key={league.id} value={league.id.toString()}>
                     {league.name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
+            {errors.leagueId && (
+              <p className="text-red-500 text-sm">{errors.leagueId.message}</p>
+            )}
           </div>
 
-          {/* Team Selection */}
+          {/* Équipe Une */}
           <div>
-            <Label htmlFor="teamOne">Équipe Une</Label>
+            <Label>Équipe Une</Label>
             <Select
-              onValueChange={(value) => setTeamOne(Number(value))}
-              disabled={!teamData}
+              onValueChange={(value) => setValue("teamOne", Number(value))}
+              disabled={!teamData || isTeamsLoading}
             >
-              <SelectTrigger id="teamOne">
+              <SelectTrigger>
                 <SelectValue placeholder="Sélectionnez une équipe" />
               </SelectTrigger>
               <SelectContent>
                 {teamData?.map((team: any) => (
-                  <SelectItem key={team.id} value={team.id}>
+                  <SelectItem key={team.id} value={team.id.toString()}>
                     {team.name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
+            {errors.teamOne && (
+              <p className="text-red-500 text-sm">{errors.teamOne.message}</p>
+            )}
           </div>
 
+          {/* Équipe Deux */}
           <div>
-            <Label htmlFor="teamTwo">Équipe Deux</Label>
+            <Label>Équipe Deux</Label>
             <Select
-              onValueChange={(value) => setTeamTwo(Number(value))}
-              disabled={!teamData}
+              onValueChange={(value) => setValue("teamTwo", Number(value))}
+              disabled={!teamData || isTeamsLoading}
             >
-              <SelectTrigger id="teamTwo">
+              <SelectTrigger>
                 <SelectValue placeholder="Sélectionnez une équipe" />
               </SelectTrigger>
               <SelectContent>
                 {teamData?.map((team: any) => (
-                  <SelectItem key={team.id} value={team.id}>
+                  <SelectItem key={team.id} value={team.id.toString()}>
                     {team.name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
+            {errors.teamTwo && (
+              <p className="text-red-500 text-sm">{errors.teamTwo.message}</p>
+            )}
           </div>
 
-          {/* Date and Time Inputs */}
+          {/* Date de début du jeu */}
           <div>
-            <Label htmlFor="gameStarts">Début du Jeu</Label>
-            <Input
-              type="datetime-local"
-              id="gameStarts"
-              value={gameStarts}
-              onChange={(e) => setGameStarts(e.target.value)}
-            />
-          </div>
-          <div>
-            <Label htmlFor="betStarts">Début des Paris</Label>
-            <Input
-              type="datetime-local"
-              id="betStarts"
-              value={betStarts}
-              onChange={(e) => setBetStarts(e.target.value)}
-            />
-          </div>
-          <div className="col-span-1 sm:col-span-2">
-            <Label htmlFor="betEnds">Fin des Paris</Label>
-            <Input
-              type="datetime-local"
-              id="betEnds"
-              value={betEnds}
-              onChange={(e) => setBetEnds(e.target.value)}
-            />
+            <Label>Début du Jeu</Label>
+            <Input type="datetime-local" {...register("matchStartTime")} />
+            {errors.matchStartTime && (
+              <p className="text-red-500 text-sm">
+                {errors.matchStartTime.message}
+              </p>
+            )}
           </div>
 
-          {/* Goals Input */}
+          {/* Buts de l'équipe Une */}
           <div>
-            <Label htmlFor="teamOneGoals">Buts de l équipe Une</Label>
+            <Label>{"Buts de l'équipe Une"}</Label>
             <Input
               type="number"
-              id="teamOneGoals"
-              value={teamOneGoals ?? ""}
-              onChange={(e) => setTeamOneGoals(Number(e.target.value))}
-              min="0"
+              {...register("teamOneGoals", { valueAsNumber: true })}
             />
-          </div>
-          <div>
-            <Label htmlFor="teamTwoGoals">Buts de l équipe Deux</Label>
-            <Input
-              type="number"
-              id="teamTwoGoals"
-              value={teamTwoGoals ?? ""}
-              onChange={(e) => setTeamTwoGoals(Number(e.target.value))}
-              min="0"
-            />
+            {errors.teamOneGoals && (
+              <p className="text-red-500 text-sm">
+                {errors.teamOneGoals.message}
+              </p>
+            )}
           </div>
 
-          {/* Percentage Input */}
-          <div className="col-span-1 sm:col-span-2">
-            <Label htmlFor="percentage">Pourcentage de gains</Label>
+          {/* Buts de l'équipe Deux */}
+          <div>
+            <Label>{"Buts de l'équipe Deux"}</Label>
             <Input
               type="number"
-              id="percentage"
-              value={percentage}
-              onChange={(e) => setPercentage(Number(e.target.value))}
+              {...register("teamTwoGoals", { valueAsNumber: true })}
+            />
+            {errors.teamTwoGoals && (
+              <p className="text-red-500 text-sm">
+                {errors.teamTwoGoals.message}
+              </p>
+            )}
+          </div>
+
+          {/* Pourcentage */}
+          <div>
+            <Label>Pourcentage</Label>
+            <Input
+              type="number"
               step="0.01"
-              min="0"
+              {...register("percentage", { valueAsNumber: true })}
             />
+            {errors.percentage && (
+              <p className="text-red-500 text-sm">
+                {errors.percentage.message}
+              </p>
+            )}
           </div>
-        </div>
-        <DialogFooter>
-          <Button
-            type="submit"
-            onClick={handleSubmit}
-            disabled={mutateGame.isPending}
-          >
-            Soumettre
-          </Button>
-        </DialogFooter>
+
+          <DialogFooter className="col-span-2">
+            <Button type="submit" disabled={mutateGame.isPending}>
+              {mutateGame.isPending ? "En cours..." : "Soumettre"}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

@@ -42,31 +42,57 @@ const getUserByPhone = async (phone: string) => {
 
 const getUserById = async (userId: number) => {
   try {
-    return await db.user.findUnique({ where: { id: userId } });
+    return await db.user.findUnique({
+      where: { id: userId },
+      include: {
+        permissions: true,
+        wallet: true,
+      },
+    });
   } catch (error) {
     handleError("getUserById", error);
     throw new Error("Erreur lors de la récupération du user par id");
   }
 };
 
+/**
+ * Retrieves the wallet balance for a user by their user ID.
+ *
+ * @param userId - The ID of the user whose wallet balance is to be retrieved.
+ * @returns The wallet associated with the user, or null if no wallet is found.
+ * @throws If there is an error with the database operation, it is handled and logged.
+ */
+const getUserWalletBalance = async (userId: number) => {
+  try {
+    const wallet = await db.wallet.findUnique({
+      where: { userId },
+      select: {
+        id: true,
+        balance: true,
+        userId: true,
+      },
+    });
+
+    return wallet;
+  } catch (error) {
+    handleError("getUserWalletBalance", error);
+    throw new Error("Erreur lors de la récupération du wallet");
+  }
+};
+
+/**
+ * Retrieves the wallet for a user by their user ID.
+ *
+ * @param userId - The ID of the user whose wallet is to be retrieved.
+ * @returns The wallet associated with the user, or null if no wallet is found.
+ * @throws If there is an error with the database operation, it is handled and logged.
+ */
 const getUserWallet = async (userId: number) => {
   try {
     return await db.wallet.findUnique({ where: { userId } });
   } catch (error) {
     handleError("getUserWallet", error);
     throw new Error("Erreur lors de la récupération du wallet par user id");
-  }
-};
-
-const getUserWallerBalance = async (userId: number) => {
-  try {
-    return db.wallet.findUnique({
-      where: {
-        userId,
-      },
-    });
-  } catch (error) {
-    handleError("getUserWallet", error);
   }
 };
 
@@ -138,6 +164,8 @@ const registerUser = async ({
         password: hashedPassword,
         name,
         phone,
+        emailVerified: true,
+        mobileVerified: true,
         referalCode: generateReferralCode(6), // Génération d'un code unique
         parainCode: parainReferralCode,
         referredById,
@@ -163,12 +191,40 @@ const registerUser = async ({
   }
 };
 
+/**
+ * Met à jour les informations de connexion d'un utilisateur
+ * @param userId - L'ID de l'utilisateur à mettre à jour
+ * @param updateData - Les données à mettre à jour (tentatives de connexion, verrouillage, dernière connexion)
+ * @returns L'utilisateur mis à jour
+ * @throws Une erreur si la mise à jour échoue
+ */
+const updateUserLoginInfo = async (
+  userId: number,
+  updateData: {
+    failedAttempts?: number;
+    lockoutUntil?: Date | null;
+    lastLogin?: Date;
+  }
+) => {
+  try {
+    return await db.user.update({
+      where: { id: userId },
+      data: updateData,
+    });
+  } catch (error) {
+    handleError("updateUserLoginInfo", error);
+    throw new Error(
+      "Erreur lors de la mise à jour des informations de connexion."
+    );
+  }
+};
+
 export {
   getUserByEmail,
   getUserById,
   getUserByPhone,
   getUserParrainWithCode,
-  getUserWallerBalance,
-  getUserWallet,
+  getUserWalletBalance,
   registerUser,
+  updateUserLoginInfo,
 };

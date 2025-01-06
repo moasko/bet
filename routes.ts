@@ -1,6 +1,6 @@
 export const publicRoutes = [
   "/",
-  "/invited",
+  "/invited/[referal]",
   // ajoutez d'autres routes publiques ici
 ];
 

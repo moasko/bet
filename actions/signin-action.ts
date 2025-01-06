@@ -16,7 +16,7 @@ export async function signInAction(data: LoginSchemaType) {
   const user = await db.user.findUnique({
     where: { email },
   });
-  const ERROR_INVALID_CREDENTIALS = "Invalid credentials";
+  const ERROR_INVALID_CREDENTIALS = "Oops! It looks like your email or password is incorrect. Please try again!";
   if (!user || !user.email || !user.password) {
     return {
       message: ERROR_INVALID_CREDENTIALS,

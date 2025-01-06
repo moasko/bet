@@ -1,5 +1,5 @@
 import { formatDuration, intervalToDuration, isBefore } from "date-fns";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 // Fonction pour calculer le temps restant
 export function afficherTempsRestant(
@@ -53,23 +53,21 @@ const MatchCountdown: React.FC<MatchProps> = ({
   betStartTime,
   handleTimePasse,
 }) => {
-  const [timeRemaining, setTimeRemaining] = useState<string>("");
+  const [timeRemaining, setTimeRemaining] =
+    useState<string>("Calcul en cours...");
+
+  // Fonction pour mettre à jour le temps restant
+  const updateRemainingTime = useCallback(() => {
+    const remainingTime = afficherTempsRestant(betStartTime, handleTimePasse);
+    setTimeRemaining(remainingTime);
+  }, [betStartTime, handleTimePasse]);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      const remainingTime = afficherTempsRestant(betStartTime, () => {
-        if (handleTimePasse) {
-          handleTimePasse();
-        } else {
-          return "La date est déjà passée";
-        }
-      });
-      setTimeRemaining(remainingTime);
-    }, 1000); // Mise à jour chaque seconde
+    updateRemainingTime(); // Mise à jour initiale
+    const interval = setInterval(updateRemainingTime, 1000); // Mise à jour chaque seconde
 
-    // Nettoyer l'intervalle lors du démontage du composant
-    return () => clearInterval(interval);
-  }, [betStartTime]); // Le tableau de dépendances utilise `betStartTime`
+    return () => clearInterval(interval); // Nettoyer l'intervalle au démontage
+  }, [updateRemainingTime]);
 
   return <p>{timeRemaining}</p>;
 };

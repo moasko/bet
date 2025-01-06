@@ -1,93 +1,138 @@
 "use client";
 
-import { BallIcon } from "@/constants/icons"; // Assure-toi d'importer l'icône appropriée
-import { formatResult } from "@/lib/utils";
 import { getActiveMatche } from "@/services/user";
 import { useQuery } from "@tanstack/react-query";
+import { Trophy } from "lucide-react";
 import Link from "next/link";
-import { Button } from "../ui/button";
+import { useState } from "react";
+import { Card } from "../ui/card";
 import MatchCardLoadingSkeleton from "./MatchCardLoadingSkeleton";
 
+function formatDate(dateString: string) {
+  const date = new Date(dateString);
+  return {
+    date: date.toLocaleDateString("fr-FR"),
+    time: date.toLocaleTimeString("fr-FR", {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+  };
+}
+
+function formatTimeRemaining(ms: number) {
+  const hours = Math.floor(ms / (1000 * 60 * 60));
+  const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((ms % (1000 * 60)) / 1000);
+  return `${hours}h ${minutes}m ${seconds}s`;
+}
+
 function ActiveMatchCard() {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ["activematches"],
     queryFn: () => getActiveMatche(),
   });
 
+  const [timeRemainingBetStart, setTimeRemainingBetStart] = useState<number>(0);
+  const [timeRemainingBetEnd, setTimeRemainingBetEnd] = useState<number>(0);
+
+  if (isLoading) {
+    return <MatchCardLoadingSkeleton />;
+  }
+
+  if (error) {
+    return (
+      <div className="text-center text-red-500 py-4">
+        Erreur lors du chargement des données
+      </div>
+    );
+  }
+
+  if (!data) {
+    return null;
+  }
+
+  const isBettingClosed = timeRemainingBetStart <= 120000;
+
   return (
-    <>
-      {isLoading ? (
-        <MatchCardLoadingSkeleton />
-      ) : (
-        <Link
-          href={`/match/${data?.id}`}
-          className="bg-white p-2 rounded block border border-red-500"
-        >
-          <div className="mb-2 space-y-1 rounded">
-            <div className="flex gap-1 items-center">
-              <BallIcon size={18} />
-              <p className="text-xs font-semibold">Match du jour</p>
-            </div>
-            <p className="text-xs">{data?.league.name}</p>
-
-            {/* First team */}
-            <div className="flex items-center space-x-1">
+    <Link href={`/match/${data.id}`}>
+      {isBettingClosed?.toString()}
+      <Card className="bg-white  overflow-hidden shadow-xs hover:shadow-lg transition-shadow duration-300">
+        {/* En-tête avec info ligue et date */}
+        <div className="bg-gradient-to-r from-red-500 to-red-600 p-2 text-white">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
               <img
-                src={data?.homeTeam.flag}
-                width={20}
-                height={20}
-                alt="team1"
-                className="rounded-full"
+                src={data.league.flag}
+                alt={data.league.name}
+                className="w-6 h-6 rounded-full border-2 border-white/20"
               />
-              <div className="w-full flex justify-between items-center">
-                <p className="text-xs font-bold">
-                  {data?.homeTeam.shortName}
-                  <span className="text-[9px] text-gray-500 ml-1 font-normal">
-                    ({data?.homeTeam.name})
-                  </span>
-                </p>
-                <p className="text-xs font-bold">
-                  {formatResult(data?.result as string)?.homeTeamResult}
-                </p>
-              </div>
+              <span className="text-sm font-semibold">{data.league.name}</span>
             </div>
-
-            {/* Second team */}
-            <div className="flex items-center space-x-1">
-              <img
-                src={data?.awayTeam.flag}
-                width={20}
-                height={20}
-                alt="team2"
-                className="rounded-full"
-              />
-              <div className="w-full flex justify-between items-center">
-                <p className="text-xs font-bold">
-                  {data?.awayTeam.shortName}
-                  <span className="text-[9px] text-gray-500 ml-1 font-normal">
-                    ({data?.awayTeam.name})
-                  </span>
-                </p>
-                <p className="text-xs font-bold">
-                  {" "}
-                  {formatResult(data?.result as string)?.awayTeamResult}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Betting buttons */}
-          <div className="flex gap-2">
-            <Button
-              className="min-w-12 text-xs bg-[#e9f2ee]/70 text-[#636363] rounded"
-              size="sm"
+            {/* <Badge
+              variant="outline"
+              className="bg-white/10 border-white/20 text-white text-[10px] font-medium"
             >
-              {data?.percentage}%
-            </Button>
+              <Clock size={12} className="mr-1" />
+              {startDate}
+            </Badge> */}
           </div>
-        </Link>
-      )}
-    </>
+        </div>
+
+        {/* Informations sur les horaires */}
+
+        {/* Contenu principal */}
+        <div className="p-4">
+          <div className="flex items-center justify-between w-full rounded">
+            {/* Équipe domicile */}
+            <TeamInfo team={data.homeTeam} />
+
+            {/* Score/VS */}
+            <div className="flex flex-col items-center justify-center px-4">
+              <div className="bg-gray-100 rounded-full w-10 h-10 flex items-center justify-center shadow-sm">
+                <span className=" text-gray-700">VS</span>
+              </div>
+              <div className="mt-2 flex items-center gap-1">
+                <Trophy size={16} className="text-yellow-500" />
+                <span className="text-sm font-medium text-gray-700">
+                  {data.percentage}x
+                </span>
+              </div>
+            </div>
+
+            {/* Équipe extérieur */}
+            <TeamInfo team={data.awayTeam} />
+          </div>
+        </div>
+      </Card>
+    </Link>
   );
 }
+
+function TeamInfo({
+  team,
+}: {
+  team: {
+    name: string;
+    shortName: string;
+    flag: string;
+  };
+}) {
+  return (
+    <div className="flex flex-col items-center gap-3 ">
+      <div className="relative">
+        <div className="w-16 h-16 rounded-full border-4 border-gray-100 shadow-inner overflow-hidden">
+          <img
+            src={team.flag}
+            alt={team.name}
+            className="w-full h-full object-cover"
+          />
+        </div>
+      </div>
+      <p className="text-sm font-bold text-gray-800 text-center">
+        {team.shortName}
+      </p>
+    </div>
+  );
+}
+
 export default ActiveMatchCard;

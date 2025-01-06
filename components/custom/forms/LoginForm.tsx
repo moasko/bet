@@ -16,20 +16,20 @@ function LoginForm() {
   } = useForm();
   const [showPassword, setShowPassword] = useState(false);
 
-  // Mutation for signing in
+  // Mutation pour la connexion
   const mutation = useMutation({
     mutationFn: signInAction,
     onSuccess: (data) => {
       if (data.success) {
-        toast.success("Login successful!");
-        // Handle post-login logic (e.g., redirect)
+        toast.success("Connexion réussie !");
+        // Logique post-connexion (redirection, etc.)
       } else {
-        toast.error(data.message || "Invalid credentials.");
+        toast.error(data.message || "Identifiants incorrects.");
       }
     },
     onError: (error) => {
-      console.error("Error during login:", error);
-      toast.error("An unexpected error occurred. Please try again.");
+      console.error("Erreur lors de la connexion :", error);
+      toast.error("Une erreur inattendue est survenue. Veuillez réessayer.");
     },
   });
 
@@ -46,45 +46,45 @@ function LoginForm() {
         Connexion
       </h2>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        {/* Email or Phone Field */}
+        {/* Champ Email ou Téléphone */}
         <div>
           <input
             type="text"
             {...register("emailOrPhone", {
-              required: "Email or phone is required.",
+              required: "L'email ou le numéro de téléphone est requis.",
               minLength: {
                 value: 5,
-                message: "Must be at least 5 characters long.",
+                message: "Doit contenir au moins 5 caractères.",
               },
             })}
-            placeholder="Email or Phone"
-            aria-label="Email or Phone"
+            placeholder="Email ou Téléphone"
+            aria-label="Email ou Téléphone"
             aria-invalid={!!errors.emailOrPhone}
             className={`mt-1 text-sm block w-full p-4 bg-white rounded ${
               errors.emailOrPhone ? "border-red-500 border" : ""
             }`}
             disabled={mutation.isPending}
           />
-          {errors.emailOrPhone && (
+          {/* {errors.emailOrPhone && (
             <p className="text-red-500 text-xs mt-1" aria-live="assertive">
-              {errors.root?.message || "Invalid email or phone."}
+              {errors.emailOrPhone.message}
             </p>
-          )}
+          )} */}
         </div>
 
-        {/* Password Field */}
+        {/* Champ Mot de passe */}
         <div className="relative">
           <input
             type={showPassword ? "text" : "password"}
             {...register("password", {
-              required: "Password is required.",
+              required: "Le mot de passe est requis.",
               minLength: {
                 value: 6,
-                message: "Password must be at least 6 characters long.",
+                message: "Le mot de passe doit contenir au moins 6 caractères.",
               },
             })}
-            placeholder="Password"
-            aria-label="Password"
+            placeholder="Mot de passe"
+            aria-label="Mot de passe"
             aria-invalid={!!errors.password}
             className={`mt-1 text-sm block w-full p-4 bg-white rounded ${
               errors.password ? "border-red-500 border" : ""
@@ -96,18 +96,18 @@ function LoginForm() {
             type="button"
             onClick={() => setShowPassword((prev) => !prev)}
             className="absolute top-1/2 right-4 transform -translate-y-1/2 text-gray-600"
-            aria-label="Toggle password visibility"
+            aria-label="Afficher/masquer le mot de passe"
           >
             {showPassword ? <EyeIcon size={16} /> : <EyeOffIcon size={16} />}
           </button>
-          {errors.password && (
+          {/* {errors.password && (
             <p className="text-red-500 text-xs mt-1" aria-live="assertive">
-              {errors.root?.message || "Invalid password."}
+              {errors.password.message}
             </p>
-          )}
+          )} */}
         </div>
 
-        {/* Submit Button */}
+        {/* Bouton Soumettre */}
         <div>
           <button
             type="submit"
@@ -118,20 +118,20 @@ function LoginForm() {
                 : "hover:bg-[#e6b804]"
             }`}
           >
-            {mutation.isPending ? "Logging in..." : "LOGIN"}
+            {mutation.isPending ? "Connexion en cours..." : "SE CONNECTER"}
           </button>
         </div>
 
-        {/* Links for Forgot Password and Signup */}
+        {/* Liens Mot de passe oublié et Inscription */}
         <div className="flex items-center justify-between text-sm mt-4">
           <Link
             href="/auth/forgot-password"
             className="text-gray-600 hover:underline"
           >
-            Forgot password?
+            Mot de passe oublié ?
           </Link>
           <Link href="/auth/signup" className="text-red-600 hover:underline">
-            Sign up
+            Inscription
           </Link>
         </div>
       </form>

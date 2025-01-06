@@ -1,7 +1,9 @@
 "use client";
 
+import Wallet from "@/components/app/Wallet";
 import { useCurrentRole } from "@/hooks/use-current-role";
-import { ArrowLeft, User } from "lucide-react";
+import { useAuthStore } from "@/store/useAuthStore";
+import { ArrowLeft, BellDot } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -20,16 +22,17 @@ const Header = ({
   const router = useRouter();
   const { data: session } = useSession();
   const role = useCurrentRole();
+  const { user: currentUser } = useAuthStore();
 
   return (
     <>
       {showFirstHeader && (
-        <header className="bg-red-600 py-2 px-2">
+        <header className="bg-red-600 py-2 px-2 sticky top-0 z-10">
           <div className="mx-auto flex w-full justify-between items-center">
             {/* Logo */}
             <div className="text-white italic font-bold text-xs">
               <Link href="/">
-                <span className="text-yellow-500">STOR</span> BET
+                <span className="text-yellow-500">STORE-</span>BET
               </Link>
             </div>
 
@@ -39,15 +42,25 @@ const Header = ({
               {session?.user ? (
                 <>
                   <div className="bg-yellow-400 p-2 rounded shadow">
-                    <p className="text-sm font-semibold uppercase">0 XOF</p>
+                    <p className="text-[11px] font-semibold uppercase">
+                      <Wallet />
+                    </p>
                   </div>
-
+                  <p>{currentUser?.email}</p>
                   <button
                     onClick={() => router.push("/dashboard/profile")}
-                    className="bg-red-500 p-2 rounded shadow"
+                    className="p-2 rounded relative shadow"
                     aria-label="Go to profile"
                   >
-                    <User color="white" size={20} />
+                    <div className="absolute z-20 top-0 right-0 text-white text-[9px] rounded-full w-4 h-4 flex items-center justify-center font-semibold border-[1.5px] bg-red-500 border-white">
+                      15
+                    </div>
+
+                    <BellDot
+                      className=" animate-bounce"
+                      color="white"
+                      size={18}
+                    />
                   </button>
                 </>
               ) : (

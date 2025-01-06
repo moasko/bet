@@ -1,9 +1,10 @@
-"use clients";
+"use client";
 
 import SimpleLayout from "@/components/layouts/app/SimpleLayout";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useProfile } from "@/hooks/useProfile";
 import { Mail, Settings, UserCog, Users } from "lucide-react";
 import Link from "next/link";
 import EquipeContent from "./_componenets/EquipeContent";
@@ -17,6 +18,22 @@ const tabContents = {
 };
 
 const Page = () => {
+  const { user, balance, isLoading, isAuthenticated } = useProfile();
+
+  if (isLoading) {
+    return (
+      <SimpleLayout showFooter={false} showSecondHeader={false}>
+        <div className="flex justify-center items-center h-[calc(100vh-100px)]">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-red-500"></div>
+        </div>
+      </SimpleLayout>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null;
+  }
+
   return (
     <SimpleLayout showFooter={false} showSecondHeader={false}>
       <div className="flex flex-col gap-2 p-2">
@@ -26,24 +43,24 @@ const Page = () => {
             <div className="flex justify-between items-center">
               <div className="flex gap-2">
                 <Avatar>
-                  <AvatarImage
-                    src="https://avatar.iran.liara.run/public/boy"
-                    alt="User Avatar"
-                  />
+                  <AvatarFallback className="bg-gray-500 text-white">
+                    {user?.name?.charAt(0)}
+                  </AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className="text-xs text-gray-500">moasko deb</p>
-                  <p className="font-bold text-md">0 XOF</p>
+                  <p className="text-xs text-gray-500">
+                    {user?.name || "Utilisateur"}
+                  </p>
+                  <p className="font-bold text-md">{`${balance || 0} XOF`}</p>
+                  <p className="text-xs text-gray-500">{user?.email}</p>
                 </div>
               </div>
               {/* Icône Mail avec badge */}
-
               <Link href="/notifications" className="relative block">
                 <div className="absolute top-0 right-0 flex justify-center items-center w-4 h-4 bg-red-500 text-[10px] text-white rounded-full">
                   3
                   <div className="absolute animate-ping top-0 right-0 w-4 h-4 bg-red-500 rounded-full"></div>
                 </div>
-
                 <Mail size={19} />
               </Link>
             </div>
@@ -56,8 +73,9 @@ const Page = () => {
               <Button
                 size="sm"
                 className="bg-[#ffd904] text-black rounded text-xs"
+                asChild
               >
-                Faire un dépôt
+                <Link href="/payement">Faire un dépôt</Link>
               </Button>
             </div>
           </div>

@@ -10,24 +10,29 @@ import {
 import { getAllLeagues } from "@/services/admin";
 import { useQuery } from "@tanstack/react-query";
 
-function LeaguSelectList({
-  leagueId,
-  setLeagueId,
-}: {
+interface League {
+  id: number;
+  name: string;
+}
+
+interface LeaguSelectListProps {
   leagueId: number;
   setLeagueId: (leagueId: number) => void;
-}) {
-  const { data, isLoading } = useQuery({
+}
+
+function LeaguSelectList({ leagueId, setLeagueId }: LeaguSelectListProps) {
+  const { data, isLoading, isError } = useQuery<League[]>({
     queryKey: ["leagues"],
     queryFn: getAllLeagues,
   });
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <div>Chargement...</div>;
+  if (isError) return <div>Erreur lors du chargement des ligues.</div>;
 
   return (
     <Select
-      value={leagueId.toString()}
-      onValueChange={(value) => setLeagueId(parseInt(value))}
+      value={leagueId ? leagueId.toString() : ""}
+      onValueChange={(value) => setLeagueId(parseInt(value, 10))}
     >
       <SelectTrigger>
         <SelectValue placeholder="Sélectionnez une ligue" />

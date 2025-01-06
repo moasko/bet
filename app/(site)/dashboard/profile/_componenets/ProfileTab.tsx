@@ -1,4 +1,7 @@
+import { getUserById } from "@/actions/user";
 import SignoutButton from "@/components/custom/forms/SignoutButton";
+import { useWallet } from "@/hooks/useWallet";
+import { useQuery } from "@tanstack/react-query";
 import {
   Download,
   History,
@@ -8,14 +11,36 @@ import {
   UserCog,
   UserPlus,
 } from "lucide-react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 
 const ProfileTab = () => {
+  const { data: session } = useSession();
+
+  const { balance } = useWallet();
+
+  const { data: user } = useQuery({
+    queryKey: ["current-user", session?.user?.email],
+    queryFn: () => getUserById(Number(session?.user?.id)),
+    enabled: !!session?.user?.email,
+  });
+
   return (
     <div className="flex flex-col gap-4">
       {/* Section Compte */}
       <div className="p-3 border-b">
         <h3 className="text-sm text-gray-600">COMPTE</h3>
+        {/* <div className="mt-2 mb-4">
+          <p className="text-sm">
+            Solde actuel: <span className="font-bold">{balance || 0} XOF</span>
+          </p>
+          <p className="text-xs text-gray-500">
+            ID: {user ? user.id : "Utilisateur non identifié"}
+          </p>
+          <p className="text-xs text-gray-500">
+            Statut: {user ? user.statuts : "Statut inconnu"}
+          </p>
+        </div> */}
         <ul className="mt-2 space-y-2">
           <li>
             <Link
@@ -46,6 +71,13 @@ const ProfileTab = () => {
       {/* Section Profil */}
       <div className="p-3 border-b">
         <h3 className="text-sm text-gray-600">PROFIL</h3>
+        {/* <div className="mt-2 mb-4">
+          <p className="text-sm font-medium">{user?.name || "Utilisateur"}</p>
+          <p className="text-xs text-gray-500">{user?.email}</p>
+          <p className="text-xs text-gray-500">
+            Rôle: {user?.role || "Utilisateur"}
+          </p>
+        </div> */}
         <ul className="mt-2 space-y-2">
           <li className="">
             <Link

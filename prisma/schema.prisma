@@ -13,6 +13,7 @@ model User {
   email          String         @unique
   phone          String         @unique
   role           UserRols       @default(USER)
+  permissions    Permission[]   @relation("UserPermissions")
   password       String
   referalCode    String         @unique
   parainCode     String
@@ -22,7 +23,10 @@ model User {
   referredById   Int?
   referredUsers  User[]         @relation("UserReferredBy")
   bets           Bet[]
-  statuts        UserStatus     @default(ACTIVE)
+  statuts        UserStatus     @default(PENDING_VERIFICATION)
+  lastLogin      DateTime?
+  failedAttempts Int            @default(0)
+  lockoutUntil   DateTime?
   payments       Payment[]
   bonuses        Bonus[]
   wallet         Wallet?
@@ -70,7 +74,10 @@ model Session {
 }
 
 enum UserRols {
+  SUPER_ADMIN
   ADMIN
+  MODERATOR
+  MANAGER
   USER
 }
 
@@ -78,18 +85,27 @@ enum UserStatus {
   ACTIVE
   BLOKED
   SUSPENDED
+  PENDING_VERIFICATION
+  DELETED
+}
+
+model Permission {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  users       User[]   @relation("UserPermissions")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Bet {
-  id           Int       @id @default(autoincrement())
-  user         User      @relation(fields: [userId], references: [id])
-  userId       Int
-  match        Match     @relation(fields: [matchId], references: [id])
-  matchId      Int
-  amount       Float
-  potentialWin Float
-  status       BetStatus @default(PENDING)
-  createdAt    DateTime  @default(now())
+  id        String   @id @default(cuid())
+  matchId   Int
+  userId    Int
+  amount    Float
+  match     Match    @relation(fields: [matchId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
 }
 
 enum BetStatus {
@@ -145,12 +161,11 @@ model Match {
   awayTeamId     Int
   percentage     Float
   matchStartTime DateTime
-  betStartTime   DateTime
-  betEndTime     DateTime
   result         String?
-  createdAt      DateTime    @default(now())
+  odds           Float?
   bets           Bet[]
   status         MatchStatus @default(PENDING)
+  createdAt      DateTime    @default(now())
 }
 
 model Payment {

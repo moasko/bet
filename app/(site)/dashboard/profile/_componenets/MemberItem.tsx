@@ -5,19 +5,24 @@ const MemberItem = ({
   date,
   level,
   name,
+  email,
 }: {
   date: string;
   level: string;
   name: string;
+  email: string;
 }) => (
   <div className="flex flex-row justify-between items-center shadow rounded p-2">
     <div className="flex flex-col gap-1">
       <p className="text-[11px] text-gray-500">{date}</p>
-      <div className="flex items-center gap-2">
-        <Badge variant={"outline"} className="text-[11px] text-red-500 rounded">
-          {level}
-        </Badge>
-        <p className="text-md">{name}</p>
+      <div className="flex flex-col gap-1">
+        <div className="flex items-center gap-2">
+          <Badge variant={"outline"} className="text-[11px] text-red-500 rounded">
+            {level}
+          </Badge>
+          <p className="text-md">{name}</p>
+        </div>
+        <p className="text-xs text-gray-500">{email}</p>
       </div>
     </div>
     <div>

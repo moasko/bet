@@ -13,18 +13,13 @@ interface UserHookParams {
   phone?: string;
 }
 
-interface User {
-  id: number;
-  email: string;
-}
-
 export function useUsers({
   userId,
   userEmail,
   userCode,
   phone,
 }: UserHookParams) {
-  const fetchUsers = async (): Promise<User | null> => {
+  const fetchUsers = async (): Promise<any | null> => {
     if (userId) {
       return await getUserById(userId);
     }

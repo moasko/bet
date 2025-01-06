@@ -20,14 +20,7 @@ import { toast } from "sonner";
 import * as z from "zod";
 import LeaguSelectList from "./LeaguSelectList";
 
-interface Team {
-  name: string;
-  leagueId: number;
-  shortName: string;
-  flag: string;
-  slug: string;
-}
-
+// Validation du formulaire avec Zod
 const formSchema = z.object({
   name: z.string().min(2, "Le nom est obligatoire"),
   leagueId: z.number().min(1, "La ligue est obligatoire"),
@@ -37,19 +30,22 @@ const formSchema = z.object({
     .min(1, "Le slug est obligatoire")
     .regex(
       /^[a-z0-9-]+$/,
-      "Le slug ne doit contenir que des lettres minuscules, chiffres et tirets"
+      "Le slug doit contenir uniquement lettres, chiffres et tirets"
     ),
   flag: z
     .string()
-    .url("Veuillez entrer une URL valide pour l'image")
-    .min(1, "L'URL de l'image est obligatoire"),
+    .url("Veuillez entrer une URL valide")
+    .min(1, "L'URL est obligatoire"),
 });
 
+type Team = z.infer<typeof formSchema>;
+
+// Fonction pour générer le slug automatiquement
 const generateSlug = (name: string) => {
   return name
     .toLowerCase()
-    .replace(/ /g, "-")
-    .replace(/[^\w-]+/g, "");
+    .replace(/\s+/g, "-") // Remplace les espaces par des tirets
+    .replace(/[^\w-]+/g, ""); // Supprime les caractères spéciaux
 };
 
 function AddNewTeam() {
@@ -58,20 +54,25 @@ function AddNewTeam() {
     handleSubmit,
     reset,
     setValue,
-    watch,
-    formState: { errors },
+    control,
+    formState: { errors, isValid },
   } = useForm<Team>({
     resolver: zodResolver(formSchema),
+    mode: "onChange",
   });
 
   const queryClient = useQueryClient();
+  const nameValue = useWatch({ control, name: "name" });
 
-  const leagueId = useWatch({
-    name: "leagueId",
-  });
+  // Mettre à jour automatiquement le slug quand le nom change
+  useEffect(() => {
+    if (nameValue) {
+      setValue("slug", generateSlug(nameValue), { shouldValidate: true });
+    }
+  }, [nameValue, setValue]);
 
   const mutation = useMutation({
-    mutationFn: (data: Team) => createNewTeam(data),
+    mutationFn: createNewTeam,
     onSuccess: () => {
       toast.success("L'équipe a été ajoutée avec succès");
       queryClient.invalidateQueries({ queryKey: ["teamsList"] });
@@ -81,17 +82,8 @@ function AddNewTeam() {
       const message =
         error?.response?.data?.message || "Erreur lors de l'ajout de l'équipe";
       toast.error(message);
-      console.error("Erreur lors de l'ajout de l'équipe :", error);
     },
   });
-
-  const nameValue = watch("name");
-
-  useEffect(() => {
-    if (nameValue) {
-      setValue("slug", generateSlug(nameValue));
-    }
-  }, [nameValue, setValue]);
 
   const onSubmit = (data: Team) => {
     mutation.mutate(data);
@@ -100,7 +92,7 @@ function AddNewTeam() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="space-x-3">+ Ajouter Une Équipe</Button>
+        <Button>+ Ajouter Une Équipe</Button>
       </DialogTrigger>
       <DialogContent className="max-w-[600px]">
         <DialogHeader>
@@ -108,63 +100,77 @@ function AddNewTeam() {
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="grid gap-4 py-4">
+            {/* Sélection de la ligue */}
             <LeaguSelectList
-              leagueId={1}
-              setLeagueId={(id) => register("leagueId")}
+              leagueId={0} // Par défaut, aucune ligue sélectionnée
+              setLeagueId={(id) =>
+                setValue("leagueId", id, { shouldValidate: true })
+              }
             />
-            <div className="flex flex-col items-center">
-              <Label htmlFor="flag" className="text-right">
-                URL de l image (drapeau)
-              </Label>
+
+            {/* URL de l'image */}
+            <div>
+              <Label htmlFor="flag">URL de l'image (drapeau)</Label>
               <Input
                 type="url"
                 id="flag"
+                placeholder="https://example.com/image.png"
                 {...register("flag")}
-                placeholder="Entrez l'URL de l'image"
+                aria-invalid={!!errors.flag}
               />
               {errors.flag && (
                 <p className="text-red-500">{errors.flag.message}</p>
               )}
-              <p className="text-sm text-gray-500 mt-2">
-                Fichiers supportés : jpeg, jpg, png. L image sera redimensionnée
-                en 150x150 px
-              </p>
             </div>
+
+            {/* Nom de l'équipe */}
             <div>
-              <Label htmlFor="name" className="text-right">
-                Nom
-              </Label>
-              <Input type="text" id="name" {...register("name")} />
+              <Label htmlFor="name">Nom</Label>
+              <Input
+                type="text"
+                id="name"
+                placeholder="Entrez le nom de l'équipe"
+                {...register("name")}
+                aria-invalid={!!errors.name}
+              />
               {errors.name && (
                 <p className="text-red-500">{errors.name.message}</p>
               )}
             </div>
+
+            {/* Nom court */}
             <div>
-              <Label htmlFor="shortName" className="text-right">
-                Nom Court
-              </Label>
-              <Input type="text" id="shortName" {...register("shortName")} />
+              <Label htmlFor="shortName">Nom Court</Label>
+              <Input
+                type="text"
+                id="shortName"
+                placeholder="Ex: PSG"
+                {...register("shortName")}
+                aria-invalid={!!errors.shortName}
+              />
               {errors.shortName && (
                 <p className="text-red-500">{errors.shortName.message}</p>
               )}
             </div>
+
+            {/* Slug (automatique) */}
             <div>
-              <Label htmlFor="slug" className="text-right">
-                Slug (automatique)
-              </Label>
+              <Label htmlFor="slug">Slug (automatique)</Label>
               <Input
                 type="text"
                 id="slug"
                 {...register("slug")}
-                disabled // Désactiver la saisie manuelle
+                readOnly // Rend le champ slug non modifiable
               />
               {errors.slug && (
                 <p className="text-red-500">{errors.slug.message}</p>
               )}
             </div>
           </div>
+
+          {/* Bouton de soumission */}
           <DialogFooter>
-            <Button type="submit" disabled={mutation.isPending}>
+            <Button type="submit" disabled={!isValid || mutation.isPending}>
               {mutation.isPending ? "En cours..." : "Soumettre"}
             </Button>
           </DialogFooter>

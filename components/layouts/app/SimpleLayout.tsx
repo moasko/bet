@@ -1,3 +1,4 @@
+import { ClientLayout } from "@/app/client-layout";
 import Navigation from "@/components/custom/Navigation";
 import React from "react";
 import Footer from "./Footer";
@@ -23,19 +24,23 @@ const SimpleLayout: React.FC<Props> = ({
   goBackLabel = "",
 }) => {
   return (
-    <div className={`min-h-screen flex-1 relative ${bgClass}`}>
-      {showHeader && (
-        <Header
-          goBackLabel={goBackLabel}
-          showFirstHeader={showFirstHeader}
-          showSecondHeader={showSecondHeader}
-        />
-      )}
-      <main>{children}</main>
-      <Navigation />
-      {showFooter && <Footer />}
-      <div className=" h-16 w-full"></div>
-    </div>
+    <ClientLayout>
+      <div
+        className={`min-h-screen flex-1 container-fluid relative ${bgClass}`}
+      >
+        {showHeader && (
+          <Header
+            goBackLabel={goBackLabel}
+            showFirstHeader={showFirstHeader}
+            showSecondHeader={showSecondHeader}
+          />
+        )}
+        <main>{children}</main>
+        {showFooter && <Footer />}
+        <Navigation />
+        <div className=" h-16 w-full"></div>
+      </div>
+    </ClientLayout>
   );
 };
 

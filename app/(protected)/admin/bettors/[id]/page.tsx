@@ -22,7 +22,11 @@ function BettorDetailsPage({ params }: { params: { id: string } }) {
   return (
     <div>
       <h1 className="text-xl font-bold">Détails du parieur</h1>
-      <StateGrid loading={isLoading} data={data?.infos as any} />
+      <StateGrid
+        loading={isLoading}
+        data={data?.infos as any}
+        loadPlaceholderCount={0}
+      />
       <div>
         <div className="grid grid-cols-6 gap-4 mt-6">
           <div>

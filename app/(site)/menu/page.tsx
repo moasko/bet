@@ -3,7 +3,6 @@
 import SimpleLayout from "@/components/layouts/app/SimpleLayout";
 import {
   Calendar,
-  Download,
   Gift,
   Globe,
   Headphones,
@@ -37,11 +36,11 @@ const MenuItem: FC<MenuItemProps> = ({ title, icon: Icon }) => {
 const Menu: FC = () => {
   return (
     <div className="bg-white max-w-sm mx-auto">
-      <MenuItem title="Connexion" icon={User} />
+      <MenuItem title="Profil" icon={User} />
       <MenuItem title="Sports" icon={Calendar} />
       <MenuItem title="Promotions" icon={Gift} />
       <MenuItem title="Média social" icon={Phone} />
-      <MenuItem title="Télécharger l'application" icon={Download} />
+      {/* <MenuItem title="Télécharger l'application" icon={Download} /> */}
       <MenuItem title="Support en ligne" icon={Headphones} />
       <MenuItem title="Langue Française" icon={Globe} />
     </div>

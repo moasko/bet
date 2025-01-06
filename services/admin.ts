@@ -192,8 +192,6 @@ export interface Match {
   awayTeamId: number;
   percentage: number;
   matchStartTime: string;
-  betStartTime: string;
-  betEndTime: string;
   result?: string;
 }
 

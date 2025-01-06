@@ -106,20 +106,6 @@ const GamesTable = () => {
                 })}
               </TableCell>
 
-              {/* Début des paris */}
-              <TableCell className="py-3 text-gray-700">
-                {format(new Date(game.betStartTime), "dd MMM yyyy, HH:mm", {
-                  locale: fr,
-                })}
-              </TableCell>
-
-              {/* Fin des paris */}
-              <TableCell className="py-3 text-gray-700">
-                {format(new Date(game.betEndTime), "dd MMM yyyy, HH:mm", {
-                  locale: fr,
-                })}
-              </TableCell>
-
               {/* Total des paris */}
               <TableCell className="py-3 text-gray-700 text-center">
                 <span className="font-bold text-blue-600">

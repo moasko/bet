@@ -44,7 +44,6 @@ const bets = [
     bet: "1000 XOF",
     potentialWinnings: "1905 XOF"
   }
-  // Ajoutez d'autres paris ici...
 ];
 
 const Page = () => {
