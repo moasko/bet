@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Variables
-DOMAIN="votre-domaine.com"
+DOMAIN="store-bet.com"
 EMAIL="votre-email@example.com"
 
 # Création des répertoires nécessaires
