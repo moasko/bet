@@ -1,42 +1,75 @@
-# Stage de build
-FROM node:18-alpine AS builder
+FROM node:18-alpine AS base
+
+# Step 1. Rebuild the source code only when needed
+FROM base AS builder
 
 WORKDIR /app
 
-# Installation des dépendances
-COPY package*.json ./
-RUN npm ci
+# Install dependencies based on the preferred package manager
+COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
+# Omit --production flag for TypeScript devDependencies
+RUN \
+  if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
+  elif [ -f package-lock.json ]; then npm ci; \
+  elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i; \
+  else echo "Warning: Lockfile not found. It is recommended to commit lockfiles to version control." && yarn install; \
+  fi
 
-# Copie des fichiers du projet
-COPY . .
+# Adjust the files and folders that should be copied to the build container
+COPY app ./app
+COPY public ./public
+COPY components ./components
+COPY lib ./lib
+COPY next.config.mjs .
+COPY prisma ./prisma
+COPY components.json .
+COPY tailwind.config.ts .
+COPY tsconfig.json .
+COPY postcss.config.mjs .
 
-# Génération du build Prisma
-RUN npx prisma generate
+# Environment variables must be present at build time
+ARG DATABASE_URL
+ENV DATABASE_URL=${DATABASE_URL}
+ARG BASIC_AUTH_USER
+ENV BASIC_AUTH_USER=${BASIC_AUTH_USER}
+ARG BASIC_AUTH_PASSWORD
+ENV BASIC_AUTH_PASSWORD=${BASIC_AUTH_PASSWORD}
 
-# Build de l'application
-ENV NEXT_TELEMETRY_DISABLED 1
-RUN npm run build
+# Build Next.js based on the preferred package manager
+RUN \
+  if [ -f yarn.lock ]; then yarn build; \
+  elif [ -f package-lock.json ]; then npm run build; \
+  elif [ -f pnpm-lock.yaml ]; then pnpm build; \
+  else npm run build; \
+  fi
 
-# Stage de production
-FROM node:18-alpine AS runner
+# Step 2. Production image, copy all the files and run next
+FROM base AS runner
+
+RUN apk --no-cache add curl
 
 WORKDIR /app
 
-ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED 1
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+USER nextjs
 
-# Copie des fichiers nécessaires depuis le stage de build
-COPY --from=builder /app/next.config.js ./
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/prisma ./prisma
 
-# Installation de Prisma Client
-RUN npm install @prisma/client
+# Automatically leverage output traces to reduce image size
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Expose le port 3000
+# Environment variables must be redefined at run time
+ARG DATABASE_URL
+ENV DATABASE_URL=${DATABASE_URL}
+ARG BASIC_AUTH_USER
+ENV BASIC_AUTH_USER=${BASIC_AUTH_USER}
+ARG BASIC_AUTH_PASSWORD
+ENV BASIC_AUTH_PASSWORD=${BASIC_AUTH_PASSWORD}
+
 EXPOSE 3000
 
-# Commande de démarrage
-CMD ["node", "server.js"]
+ENV PORT 3000
+
+CMD HOSTNAME=0.0.0.0 node server.js

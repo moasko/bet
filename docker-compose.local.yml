@@ -9,7 +9,7 @@ services:
       - "3000:3000"
     environment:
       - DATABASE_URL=mysql://betapp:betpassword@db:3306/betdb
-      - NEXTAUTH_SECRET=your-local-secret
+      - NEXTAUTH_SECRET=lmsI3CvJX1lUokQlVFdmmRFp066l83/gQfSP6YNlRaE=
       - NEXTAUTH_URL=http://localhost:3000
     volumes:
       - .:/app
